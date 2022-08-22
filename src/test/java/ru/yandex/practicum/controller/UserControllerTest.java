@@ -61,25 +61,45 @@ class UserControllerTest {
     //имя для отображения может быть пустым — в таком случае будет использован логин;
     @Test
     public void createdUserWithEmptyName() {
-        User userNameIsNull = userIsCorrectly.toBuilder().name(null).build();
-        User userNameIsEmpty = userIsCorrectly.toBuilder().name("").build();
-        User userNameIsBlank = userIsCorrectly.toBuilder().name(" ").build();
+        User userIsCorrectlyAfterChecking = userIsCorrectly.toBuilder().build();
+        userController.checkUser(userIsCorrectlyAfterChecking);
         
+        User userNameIsNull = userIsCorrectly.toBuilder().name(null).build();
+        User userNameIsNullAfterChecking = userNameIsNull.toBuilder().build();
+        userController.checkUser(userNameIsNullAfterChecking);
+        
+        User userNameIsEmpty = userIsCorrectly.toBuilder().name("").build();
+        User userNameIsEmptyAfterChecking = userNameIsEmpty.toBuilder().name("").build();
+        userController.checkUser(userNameIsEmptyAfterChecking);
+        
+        User userNameIsBlank = userIsCorrectly.toBuilder().name(" ").build();
+        User userNameIsBlankAfterChecking = userNameIsBlank.toBuilder().build();
+        userController.checkUser(userNameIsBlankAfterChecking);
+        
+        //Тест правильно заполненного юзера:
         assertEquals(
-                "User{id=0, email='email@email', login='login', name='name', birthday=2000-01-03}"
+                "User(id=0, email=email@email, login=login, name=name, birthday=2000-01-03)"
                 , userIsCorrectly.toString()
                 , "Ошибка тестирования перевода в строку полностью заполненного юзера.");
+        assertEquals(userIsCorrectlyAfterChecking, userIsCorrectly,
+                "Ошибка тестирования сравнения полностью заполненного юзера и его же но после проверки.");
+    
+        //Тест юзера с name = null:
         assertEquals(
-                "User{id=0, email='email@email', login='login', name='login', birthday=2000-01-03}"
-                , userNameIsNull.toString()
+                "User(id=0, email=email@email, login=login, name=login, birthday=2000-01-03)"
+                , userNameIsNullAfterChecking.toString()
                 , "Ошибка тестирования перевода в строку юзера с 'name' = null.");
+        
+        //Тест юзера с пустым name:
         assertEquals(
-                "User{id=0, email='email@email', login='login', name='login', birthday=2000-01-03}"
-                , userNameIsEmpty.toString()
+                "User(id=0, email=email@email, login=login, name=login, birthday=2000-01-03)"
+                , userNameIsEmptyAfterChecking.toString()
                 , "Ошибка тестирования перевода в строку юзера с пустым значением 'name'.");
+    
+        //Тест юзера с name, состоящим только из пробелов:
         assertEquals(
-                "User{id=0, email='email@email', login='login', name='login', birthday=2000-01-03}"
-                , userNameIsBlank.toString()
+                "User(id=0, email=email@email, login=login, name=login, birthday=2000-01-03)"
+                , userNameIsBlankAfterChecking.toString()
                 , "Ошибка тестирования перевода в строку юзера со значением 'name'," +
                         " состоящим только из пробелов.");
     }

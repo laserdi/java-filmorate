@@ -8,7 +8,9 @@ import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.model.ValidateException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,37 +28,43 @@ public class FilmController {
     private static Integer count = 0;
     
     @GetMapping("/films")
-    public Map<Integer, Film> findAllFilms() {
+    public List<Film> findAllFilms() {
         count++;
-        Film filmForTest = Film.builder()
-                .id(-5)
-                .name("фильм №1")
-                .description("описание фильма №1")
-                .releaseDate(LocalDate.of(1983, 12, 20))
-                .duration(100)
-                .build();
-        System.out.println(filmForTest);
-        //films.put(filmForTest.getId(), filmForTest);
-        return films;
+        log.info("Выдан ответ на запрос всех фильмов.");
+        return new ArrayList<>(films.values());
     }
     
+    /**
+     * Создание фильма
+     *
+     * @param film из тела запроса.
+     * @return статус состояния на запрос и тело ответа (созданный фильм или ошибка).
+     */
     @PostMapping("/films")
-    public ResponseEntity<String> createFilm(@RequestBody Film film) {
+    public ResponseEntity<?> createFilm(@RequestBody Film film) {
         try {
             checkFilm(film);
-            count++;
+            
             if (film.getId() == null) {
-                film.setId(count);
-            }
-            if (isFilmAlreadyExistInLibrary(film)) {
-                //Получается обновление существующей записи о фильме.
-//                films.put(film.getId(), film);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Выполнено обновление существующей записи о фильме: \"" + film.getName() + "\".");
+                //заполняем сущность необходимыми данными
+                film.setId(getUniqueId());
+                log.info("Создана новая запись в библиотеке о фильме с названием: '"
+                        + film.getName() + "'.");
+                films.put(film.getId(), film);
+                return ResponseEntity.ok(film);
+            } else if (idFilmAlreadyExistInLibrary(film)) {
+                log.info("При создании выполнено обновление существующей записи " +
+                        "о фильме с ID = '" + films.get(film.getId()).getId()
+                        + "' и названием '" + films.get(film.getId()).getName() + "'.");
+                films.put(film.getId(), film);
+                return ResponseEntity.ok(film);
+            } else {
+                log.info("Создан фильм из 'полного' объекта в теле запроса. " +
+                        "В запросе были все необходимые поля.");
+                films.put(film.getId(), film);
+                return ResponseEntity.ok(film);
             }
             
-            films.put(film.getId(), film);
-            return ResponseEntity.ok("Фильм \"" + film.getName() + "\" успешно добавлен в библиотеку.");
             
         } catch (ValidateException ex) {
             log.error("Ошибка добавления фильма в библиотеку. Ошибка: {}", ex.getMessage());
@@ -67,26 +75,36 @@ public class FilmController {
     
     /**
      * Обновление информации о существующем фильме.
+     *
      * @param film обновляемый фильм.
      * @return ответ о совершённом действии.
      */
     @PutMapping("/films")
-    public ResponseEntity<String> updateFilm(@RequestBody Film film) {
+    public ResponseEntity<?> updateFilm(@RequestBody Film film) {
         try {
             checkFilm(film);
-            
-            if (isFilmAlreadyExistInLibrary(film)) {
-                //Получается обновление существующей записи о фильме.
+            if (film.getId() == null) {
+                film.setId(getUniqueId());
+                log.info("Фильм \"" + film.getName() + "\" успешно добавлен в библиотеку."
+                        + " Вбъекта в теле запроса, отсутствовал ID (он был сгенерирован " +
+                        "и присвоен объекту).");
                 films.put(film.getId(), film);
-                log.info("Выполнено обновление существующей записи о фильме: \""
-                        + film.getName() + "\".");
-                return ResponseEntity.ok("Выполнено обновление существующей записи о фильме: \""
-                        + film.getName() + "\".");
+                return ResponseEntity.ok(film);
+                
+            } else if (idFilmAlreadyExistInLibrary(film)) {
+                //Получается обновление существующей записи о фильме.
+                log.info("Выполнено обновление существующей записи " +
+                        "о фильме с ID = '" + films.get(film.getId()).getId()
+                        + "' и названием '" + films.get(film.getId()).getName() + "'.");
+                films.put(film.getId(), film);
+                return ResponseEntity.ok(film);
+                
+            } else {
+                log.info("Ошибка обновления информации о фильме с ID = '"
+                        + film.getId() + "', которого нет в библиотеке.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(film);
             }
             
-            films.put(film.getId(), film);
-            log.info("Фильм \"" + film.getName() + "\" успешно добавлен в библиотеку.");
-            return ResponseEntity.ok("Фильм \"" + film.getName() + "\" успешно добавлен в библиотеку.");
         } catch (ValidateException ex) {
             log.error("Ошибка обновления фильма в библиотеке. Ошибка: {}", ex.getMessage());
             return ResponseEntity.badRequest().body("Ошибка добавления фильма в библиотеку. Ошибка: "
@@ -111,40 +129,52 @@ public class FilmController {
         String description = film.getDescription();
         LocalDate releaseDate = film.getReleaseDate();
         Integer duration = film.getDuration();
-
-/*
+        
         if (id == null) {
-            throw new InvalidFilmException("Проверьте ID фильма. ID отсутствует.");
+            log.info("chekFilm(): ID фильма = null.");
         }
-*/
         
         if (name == null || name.isEmpty() || name.isBlank()) {
-            throw new ValidateException("Отсутствует название фильма.");
+            throw new ValidateException("chekFilm(): Отсутствует название фильма.");
         }
         
         if (description != null && description.length() > 200) {
-            throw new ValidateException("Максимальная длина описания фильма должна быть не более" +
+            throw new ValidateException("chekFilm(): Максимальная длина описания фильма должна быть не более" +
                     " 200 символов.");
         }
         
         if (releaseDate == null || releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidateException("Дата релиза должна быть не раньше 28 декабря 1895 года.");
+            throw new ValidateException("chekFilm(): Дата релиза должна быть не раньше 28 декабря 1895 года.");
         }
         
-        if (duration!= null && duration <= 0) {
-            throw new ValidateException("Продолжительность фильма должна быть положительной.");
+        if (duration != null && duration <= 0) {
+            throw new ValidateException("chekFilm(): Продолжительность фильма должна быть положительной.");
         }
     }
     
     /**
-     * Метод проверки наличия фильма в библиотеке.
+     * Метод проверки наличия фильма в библиотеке по его ID.
      *
      * @param film фильм, наличие которого необходимо проверить в библиотеке.
      * @return true - фильм присутствует в библиотеке.
      * <p>false - фильма нет в библиотеке.</p>
      */
-    private boolean isFilmAlreadyExistInLibrary(Film film) {
+    private boolean idFilmAlreadyExistInLibrary(Film film) {
         Integer id = film.getId();
         return films.containsKey(id);
+    }
+    
+    /**
+     * Метод получения уникального ID для фильма.
+     *
+     * @return уникальный ID.
+     */
+    public Integer getUniqueId() {
+        while (true) {
+            count++;
+            if (!films.containsKey(count)) {
+                return count;
+            }
+        }
     }
 }

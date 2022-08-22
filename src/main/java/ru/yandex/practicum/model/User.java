@@ -1,7 +1,8 @@
 package ru.yandex.practicum.model;
 
-import lombok.Builder;
-import lombok.Value;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -12,37 +13,20 @@ import java.time.LocalDate;
  * <p>имя для отображения — name;</p>
  * <p>дата рождения — birthday.</p>
  */
-@Value
+@Data
 @Builder(toBuilder = true)
+//@NoArgsConstructor
+//@AllArgsConstructor
 public class User {
-    Integer id;
+    static Integer count = 1;
+    @Builder.Default
+    Integer id = count;
     String email;
     String login;
     String name;
     LocalDate birthday;
     
-    //<p>имя для отображения может быть пустым — в таком случае будет использован логин;</p>
-    //User{id=-5, email='edd@hyhhg', login='login юзера №1', name='имя юзера 1', birthday=1983-12-20}
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        if (name == null || name.isEmpty() || name.isBlank()) {
-            return "User{" +
-                    "id=" + id +
-                    ", email='" + email + '\'' +
-                    ", login='" + login + '\'' +
-                    ", name='" + login + '\'' +
-                    ", birthday=" + birthday +
-                    '}';
-        } else {
-            return "User{" +
-                    "id=" + id +
-                    ", email='" + email + '\'' +
-                    ", login='" + login + '\'' +
-                    ", name='" + name + '\'' +
-                    ", birthday=" + birthday +
-                    '}';
-            
-        }
+    public static Integer getCount() {
+        return count++;
     }
 }

@@ -58,7 +58,7 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(2000, 1, 4)).duration(100)
                 .build();
         
-        Film filmDescriptionIs201Symbols = Film.builder().id(1).name("description = 201 символов")
+        Film filmDescriptionIs201Symbols = Film.builder().id(1).name("description = 201 символ")
                 .description("12345678901234567890123456789012345678901234567890" +
                         "12345678901234567890123456789012345678901234567890" +
                         "12345678901234567890123456789012345678901234567890" +
