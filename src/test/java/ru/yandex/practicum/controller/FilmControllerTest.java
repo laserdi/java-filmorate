@@ -2,7 +2,7 @@ package ru.yandex.practicum.controller;
 
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.model.Film;
-import ru.yandex.practicum.model.ValidateException;
+import ru.yandex.practicum.exception.ValidateException;
 
 import java.time.LocalDate;
 

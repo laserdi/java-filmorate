@@ -1,4 +1,4 @@
-package ru.yandex.practicum.model;
+package ru.yandex.practicum.exception;
 
 public class ValidateException extends RuntimeException {
     

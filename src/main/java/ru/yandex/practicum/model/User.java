@@ -1,8 +1,7 @@
 package ru.yandex.practicum.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
 import java.time.LocalDate;
 
@@ -19,8 +18,11 @@ import java.time.LocalDate;
 //@AllArgsConstructor
 public class User {
     static Integer count = 1;
+/*
     @Builder.Default
     Integer id = count;
+*/
+    Integer id;
     String email;
     String login;
     String name;
