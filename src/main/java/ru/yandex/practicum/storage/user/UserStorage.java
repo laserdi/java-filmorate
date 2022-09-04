@@ -28,7 +28,7 @@ public interface UserStorage {
      * @param user пользователь
      * @return True - удалён. False - не выполнено.
      */
-    boolean removeFromStorage(User user);
+    User removeFromStorage(User user);
     
     /**
      * Получить список всех пользователей.
@@ -41,7 +41,8 @@ public interface UserStorage {
      * Получить пользователя по ID.
      *
      * @param id ID пользователя.
-     * @return пользователь User или null.
+     * @return User - пользователь присутствует в библиотеке.
+     * <p>null - пользователя нет в библиотеке.</p>
      */
     User getUserById(Integer id);
     
@@ -49,7 +50,8 @@ public interface UserStorage {
      * Получить пользователя по логину.
      *
      * @param login логин пользователя.
-     * @return пользователь User или null.
+     * @return User - пользователь присутствует в библиотеке.
+     * <p>null - пользователя нет в библиотеке.</p>
      */
     User getUserByLogin(String login);
     

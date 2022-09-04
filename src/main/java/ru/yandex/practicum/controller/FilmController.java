@@ -1,17 +1,19 @@
 package ru.yandex.practicum.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.exception.ValidateException;
+import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.service.FilmService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Добавьте в классы-контроллеры эндпоинты с подходящим типом запроса для каждого из случаев.
@@ -22,16 +24,28 @@ import java.util.Map;
  * <p>получение всех фильмов.</p>
  */
 @Slf4j
+@Component
 @RestController
+@RequiredArgsConstructor
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private static Integer count = 0;
+    FilmService filmService;
     
-    @GetMapping("/films")
-    public List<Film> findAllFilms() {
-        count++;
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
+    
+    static final String PATH_FOR_FILMS = "/films";
+    
+    /**
+     * Получение списка всех фильмов.
+     *
+     * @return список фильмов.
+     */
+    @GetMapping(PATH_FOR_FILMS)
+    public List<Film> getAllFilms() {
         log.info("Выдан ответ на запрос всех фильмов.");
-        return new ArrayList<>(films.values());
+        return filmService.getAllFilms();
     }
     
     /**
@@ -40,37 +54,17 @@ public class FilmController {
      * @param film из тела запроса.
      * @return статус состояния на запрос и тело ответа (созданный фильм или ошибка).
      */
-    @PostMapping("/films")
+    @PostMapping(PATH_FOR_FILMS)
     public ResponseEntity<?> createFilm(@RequestBody Film film) {
+        Film createdFilm;
         try {
-            checkFilm(film);
-            
-            if (film.getId() == null) {
-                //заполняем сущность необходимыми данными
-                film.setId(getUniqueId());
-                log.info("Создана новая запись в библиотеке о фильме с названием: '"
-                        + film.getName() + "'.");
-                films.put(film.getId(), film);
-                return ResponseEntity.ok(film);
-            } else if (idFilmAlreadyExistInLibrary(film)) {
-                log.info("При создании выполнено обновление существующей записи " +
-                        "о фильме с ID = '" + films.get(film.getId()).getId()
-                        + "' и названием '" + films.get(film.getId()).getName() + "'.");
-                films.put(film.getId(), film);
-                return ResponseEntity.ok(film);
-            } else {
-                log.info("Создан фильм из 'полного' объекта в теле запроса. " +
-                        "В запросе были все необходимые поля.");
-                films.put(film.getId(), film);
-                return ResponseEntity.ok(film);
-            }
-            
-            
+            createdFilm = filmService.createFilm(film);
         } catch (ValidateException ex) {
-            log.error("Ошибка добавления фильма в библиотеку. Ошибка: {}", ex.getMessage());
-            return ResponseEntity.badRequest().body("Ошибка добавления фильма в библиотеку. Ошибка: "
-                    + ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        } catch (NotFoundRecordInBD ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
+        return ResponseEntity.ok(createdFilm);
     }
     
     /**
@@ -79,37 +73,17 @@ public class FilmController {
      * @param film обновляемый фильм.
      * @return ответ о совершённом действии.
      */
-    @PutMapping("/films")
+    @PutMapping(PATH_FOR_FILMS)
     public ResponseEntity<?> updateFilm(@RequestBody Film film) {
+        Film updatedFilm;
         try {
-            checkFilm(film);
-            if (film.getId() == null) {
-                film.setId(getUniqueId());
-                log.info("Фильм \"" + film.getName() + "\" успешно добавлен в библиотеку."
-                        + " Вбъекта в теле запроса, отсутствовал ID (он был сгенерирован " +
-                        "и присвоен объекту).");
-                films.put(film.getId(), film);
-                return ResponseEntity.ok(film);
-                
-            } else if (idFilmAlreadyExistInLibrary(film)) {
-                //Получается обновление существующей записи о фильме.
-                log.info("Выполнено обновление существующей записи " +
-                        "о фильме с ID = '" + films.get(film.getId()).getId()
-                        + "' и названием '" + films.get(film.getId()).getName() + "'.");
-                films.put(film.getId(), film);
-                return ResponseEntity.ok(film);
-                
-            } else {
-                log.info("Ошибка обновления информации о фильме с ID = '"
-                        + film.getId() + "', которого нет в библиотеке.");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(film);
-            }
-            
+            updatedFilm = filmService.updateFilm(film);
         } catch (ValidateException ex) {
-            log.error("Ошибка обновления фильма в библиотеке. Ошибка: {}", ex.getMessage());
-            return ResponseEntity.badRequest().body("Ошибка добавления фильма в библиотеку. Ошибка: "
-                    + ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        } catch (NotFoundRecordInBD ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
+        return ResponseEntity.ok(updatedFilm);
     }
     
     
@@ -149,32 +123,6 @@ public class FilmController {
         
         if (duration != null && duration <= 0) {
             throw new ValidateException("chekFilm(): Продолжительность фильма должна быть положительной.");
-        }
-    }
-    
-    /**
-     * Метод проверки наличия фильма в библиотеке по его ID.
-     *
-     * @param film фильм, наличие которого необходимо проверить в библиотеке.
-     * @return true - фильм присутствует в библиотеке.
-     * <p>false - фильма нет в библиотеке.</p>
-     */
-    private boolean idFilmAlreadyExistInLibrary(Film film) {
-        Integer id = film.getId();
-        return films.containsKey(id);
-    }
-    
-    /**
-     * Метод получения уникального ID для фильма.
-     *
-     * @return уникальный ID.
-     */
-    public Integer getUniqueId() {
-        while (true) {
-            count++;
-            if (!films.containsKey(count)) {
-                return count;
-            }
         }
     }
 }

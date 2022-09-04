@@ -1,8 +1,11 @@
 package ru.yandex.practicum.model;
 
-import lombok.Builder;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Past;
 import java.time.LocalDate;
 
 /**
@@ -12,20 +15,30 @@ import java.time.LocalDate;
  * <p>имя для отображения — name;</p>
  * <p>дата рождения — birthday.</p>
  */
-@Data
+@Getter
+@Setter
 @Builder(toBuilder = true)
-//@NoArgsConstructor
-//@AllArgsConstructor
+@ToString
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
+    
+    @JsonIgnore
     static Integer count = 1;
-/*
-    @Builder.Default
-    Integer id = count;
-*/
+    
     Integer id;
+    
+    @Email
+    @NotBlank
     String email;
+    
+    @NotBlank
     String login;
+    
     String name;
+    
+    @Past
     LocalDate birthday;
     
     public static Integer getCount() {

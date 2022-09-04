@@ -1,6 +1,7 @@
 package ru.yandex.practicum.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.service.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -27,6 +29,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @Component
+@RequiredArgsConstructor
 public class UserController {
     UserService userService;
     
@@ -34,11 +37,14 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+    
+    static final String PATH_FOR_USERS = "/users";
+    
     /**
      * Получение списка всех пользователей.
      */
 //    @Override
-    @GetMapping("/users")
+    @GetMapping(PATH_FOR_USERS)
     public List<User> getAllUsers() {
         log.info("Выдан ответ на запрос всех пользователей.");
         return userService.getAllUsers();
@@ -51,16 +57,17 @@ public class UserController {
      * @return созданный пользователь.
      */
 //    @Override
-    @PostMapping("/users")
+    @PostMapping(PATH_FOR_USERS)
     public ResponseEntity<?> createUser(@RequestBody User user) {
+        User createdUser;
         try {
-            userService.addToStorage(user);
+            createdUser = userService.addToStorage(user);
         } catch (ValidateException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         } catch (NotFoundRecordInBD ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(createdUser);
     }
     
     
@@ -70,15 +77,16 @@ public class UserController {
      * @param user обновляемый пользователь.
      * @return ответ о совершённом действии.
      */
-    @PutMapping("/users")
+    @PutMapping(PATH_FOR_USERS)
     public ResponseEntity<?> updateUser(@RequestBody User user) {
+        User updatedUser;
         try {
-            userService.updateInStorage(user);
+            updatedUser = userService.updateInStorage(user);
         } catch (ValidateException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         } catch (NotFoundRecordInBD ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(updatedUser);
     }
 }

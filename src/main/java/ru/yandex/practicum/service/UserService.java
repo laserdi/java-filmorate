@@ -2,8 +2,6 @@ package ru.yandex.practicum.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.exception.ValidateException;
@@ -39,24 +37,24 @@ public class UserService {
      * @param user пользователь.
      * @return добавляемый пользователь.
      */
-    public User addToStorage(User user) {
-    
+    public User addToStorage(User user) throws ValidateException, NotFoundRecordInBD {
+        
         //Проверяем необходимые поля.
         checkUser(user);
         //Если имя пустое, то оно равно логину.
         nameSetAsLogin(user);
-    
+        
         //ID, найденный в БД по логину:
         Integer idFromDB = idFromDBByLogin(user);
-    
-        if (idFromDB != null) {
         
+        if (idFromDB != null) {
+            
             if (user.getId() == null || user.getId().equals(idFromDB)) {
                 //Проверяем ID входящего пользователя. Если он null или равен ID, найденному в БД по логину:
                 //будет обновление существующего пользователя.
                 user.setId(idFromDB);       //операция необходима при user.getId() == null.
                 String message = "В результате добавления пользователя в БД обновлён существующий пользователь " +
-                        "с логином = '" + user.getLogin() + "'.";
+                        "с логином = '" + user.getLogin() + "'." + user;
                 log.info(message);
                 return inMemoryUStorage.updateInStorage(user);
             } else {
@@ -74,12 +72,12 @@ public class UserService {
         
         //Получается, что пришёл "новый" пользователь, логина которого нет в БД.
         //И, если с пустым ID, то, сразу же его заполним.
-        setIdForUserFromCount(user);
-    
+        setUniqueIdForUserFromCount(user);
+        
         String message = "В результате добавления пользователя в БД добавлен новый пользователь:\t" + user;
         log.info(message);
         return inMemoryUStorage.addToStorage(user);
-    
+        
     }
     
     /**
@@ -89,8 +87,11 @@ public class UserService {
      * @return обновлённый пользователь.
      */
     public User updateInStorage(User user) {
-    
+        //Проверяем необходимые поля.
+        checkUser(user);
+        
         User userTemp = user.toBuilder().build(); //Делаем копию юзера для дальнейшей обработки.
+        nameSetAsLogin(userTemp);
         Integer idFromDB = idFromDBByLogin(userTemp);
         if (idFromDB != null) {
             //********** Пользователь по логину присутствует в БД.
@@ -109,7 +110,7 @@ public class UserService {
                 throw new NotFoundRecordInBD(error);
             }
         }
-    
+        
         //********** Пользователь по логину отсутствует в БД.******************
         if (userTemp.getId() == null) {
             //Генерируем для входящего пользователя ID и добавляем нового пользователя в БД.
@@ -130,36 +131,13 @@ public class UserService {
         } else {
             //ID и Логина нет в БД. -> Не верный запрос.
             String error = "В запросе на обновление пользователя ошибка. Login '" + userTemp.getLogin()
-                            + "'и ID = '" + userTemp.getId() + "' не найдены в БД.";
+                    + "'и ID = '" + userTemp.getId() + "' не найдены в БД.";
             log.error(error);
             throw new NotFoundRecordInBD(error);
         }
     }
     
-    /**
-     * Метод присвоения имени пользователя при его отсутствии.
-     * Если имя пустое, то оно равно логину.
-     *
-     * @param user обрабатываемый пользователь.
-     */
-    private void nameSetAsLogin(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-    }
-    
-    
-    /**
-     * Метод присвоения ID юзеру, если ID не задан.
-     *
-     * @param user обрабатываемый пользователь.
-     */
-    private void setIdForUserFromCount(User user) {
-        if (user.getId() == null) {
-            user.setId(User.getCount());
-        }
-    }
-    
+
     /**
      * Для User:
      * <p>электронная почта не может быть пустой и должна содержать символ @;</p>
@@ -202,13 +180,13 @@ public class UserService {
         if (birthday != null) {
             if (birthday.isAfter(LocalDate.now())) {
                 log.info("checkUser(): Не пройдена проверка корректной даты рождения. Дата рождения ещё не наступила");
-                throw new ValidateException("Дата рождения ещё не наступила. Введите корректную дату рождения.");
+                throw new ValidateException("ЮзерСервис->check: Дата рождения ещё не наступила. Введите корректную дату рождения.");
             }
         }
     }
     
     /**
-     * Метод проверки наличия пользователя в базе данных.
+     * Метод проверки наличия пользователя в базе данных по логину.
      *
      * @param user пользователь, наличие логина которого необходимо проверить в базе данных.
      * @return ID, найденный в БД по логину.
@@ -223,4 +201,35 @@ public class UserService {
                 .orElse(null);
     }
     
+    /**
+     * Метод присвоения имени пользователя при его отсутствии.
+     * Если имя пустое, то оно равно логину.
+     *
+     * @param user обрабатываемый пользователь.
+     */
+    private void nameSetAsLogin(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+    }
+    
+    /**
+     * Метод присвоения юзеру уникального ID, если ID не задан.
+     *
+     * @param user обрабатываемый пользователь.
+     * @return True - уникальный ID присвоен.
+     * <p>False - уникальный ID у пользователя user был.</p>
+     */
+    private boolean setUniqueIdForUserFromCount(User user) {
+        if (user.getId() != null) {
+            return false;
+        }
+        while (true) {
+            Integer count = User.getCount();
+            if (inMemoryUStorage.getUserById(count) == null) {
+                user.setId(count);
+                return true;
+            }
+        }
+    }
 }

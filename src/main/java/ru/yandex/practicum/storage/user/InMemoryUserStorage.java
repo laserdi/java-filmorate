@@ -1,14 +1,9 @@
 package ru.yandex.practicum.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.model.User;
-import ru.yandex.practicum.exception.ValidateException;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +27,7 @@ public class InMemoryUserStorage implements UserStorage {
      * Добавить пользователя в БД.
      *
      * @param user пользователь.
-     * @return добавляемый пользователь.
+     * @return добавленный пользователь.
      */
     @Override
     public User addToStorage(User user) {
@@ -61,32 +56,34 @@ public class InMemoryUserStorage implements UserStorage {
      * @return True - удалён. False - не выполнено.
      */
     @Override
-    public boolean removeFromStorage(User user) {
-        return users.remove(user.getId(), user);
+    public User removeFromStorage(User user) {
+        if (users.remove(user.getId(), user)) {
+            return user;
+        }
+        return null;
     }
     
     /**
      * Получить пользователя по ID.
      *
      * @param id ID пользователя.
-     * @return пользователь User или null.
+     * @return User - пользователь присутствует в библиотеке.
+     * <p>null - пользователя нет в библиотеке.</p>
      */
     @Override
     public User getUserById(Integer id) {
-        return users.values().stream().filter(u -> u.getId().equals(id)).findFirst().orElse(null);
+        return users.getOrDefault(id, null);
     }
     
     /**
      * Получить пользователя по логину.
      *
      * @param login логин пользователя.
-     * @return пользователь User или null.
+     * @return User - пользователь присутствует в библиотеке.
+     * <p>null - пользователя нет в библиотеке.</p>
      */
     @Override
     public User getUserByLogin(String login) {
         return users.values().stream().filter(u -> u.getLogin().equals(login)).findFirst().orElse(null);
     }
-    
-
-    
 }

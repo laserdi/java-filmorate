@@ -20,7 +20,7 @@ jobs:
           cache: maven
 
       - name: Install helper script
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y wget &&
+        run: sudo apt-get updateInStorage && sudo apt-get install --no-install-recommends -y wget &&
           wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
           chmod a+x /tmp/wait-for-it.sh
 
