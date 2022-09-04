@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.exception.ValidateException;
@@ -58,16 +59,8 @@ public class UserController {
      */
 //    @Override
     @PostMapping(PATH_FOR_USERS)
-    public ResponseEntity<?> createUser(@RequestBody User user) {
-        User createdUser;
-        try {
-            createdUser = userService.addToStorage(user);
-        } catch (ValidateException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        } catch (NotFoundRecordInBD ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
-        return ResponseEntity.ok(createdUser);
+    public ResponseEntity<?> createUser(@Validated @RequestBody User user) {
+        return ResponseEntity.ok(userService.addToStorage(user));
     }
     
     
@@ -79,14 +72,7 @@ public class UserController {
      */
     @PutMapping(PATH_FOR_USERS)
     public ResponseEntity<?> updateUser(@RequestBody User user) {
-        User updatedUser;
-        try {
-            updatedUser = userService.updateInStorage(user);
-        } catch (ValidateException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        } catch (NotFoundRecordInBD ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+        User updatedUser = userService.updateInStorage(user);
         return ResponseEntity.ok(updatedUser);
     }
 }

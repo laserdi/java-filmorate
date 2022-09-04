@@ -11,8 +11,10 @@ import lombok.Setter;
  * Специальный объект для универсального формата ошибки.
  */
 public class ErrorResponse {
+    String error;
     String message;
-    public ErrorResponse(String error) {
+    public ErrorResponse(String error, String message) {
+        this.error = error;
         this.message = message;
     }
 }

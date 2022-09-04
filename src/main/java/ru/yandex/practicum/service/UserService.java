@@ -180,7 +180,8 @@ public class UserService {
         if (birthday != null) {
             if (birthday.isAfter(LocalDate.now())) {
                 log.info("checkUser(): Не пройдена проверка корректной даты рождения. Дата рождения ещё не наступила");
-                throw new ValidateException("ЮзерСервис->check: Дата рождения ещё не наступила. Введите корректную дату рождения.");
+                throw new ValidateException("checkUser(): Дата рождения ещё не наступила. " +
+                        "Введите корректную дату рождения.");
             }
         }
     }

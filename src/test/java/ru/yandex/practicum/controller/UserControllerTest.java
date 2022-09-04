@@ -46,13 +46,13 @@ class UserControllerTest {
     private ObjectMapper objectMapper;
     
     @MockBean
-    private UserStorage userStorage;
-    
-    @MockBean
     UserService userService;
     
     @MockBean
-    UserController userController;
+    private UserStorage userStorage;
+    
+//    @MockBean
+//    UserController userController;
     
     User userIsCorrectly = User.builder().id(0).email("email@email").login("login").name("name")
             .birthday(LocalDate.of(2000, 1, 3)).build();

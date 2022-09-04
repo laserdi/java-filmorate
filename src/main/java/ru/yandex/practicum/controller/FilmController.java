@@ -56,15 +56,7 @@ public class FilmController {
      */
     @PostMapping(PATH_FOR_FILMS)
     public ResponseEntity<?> createFilm(@RequestBody Film film) {
-        Film createdFilm;
-        try {
-            createdFilm = filmService.createFilm(film);
-        } catch (ValidateException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        } catch (NotFoundRecordInBD ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
-        return ResponseEntity.ok(createdFilm);
+        return ResponseEntity.ok(filmService.createFilm(film));
     }
     
     /**
@@ -75,15 +67,7 @@ public class FilmController {
      */
     @PutMapping(PATH_FOR_FILMS)
     public ResponseEntity<?> updateFilm(@RequestBody Film film) {
-        Film updatedFilm;
-        try {
-            updatedFilm = filmService.updateFilm(film);
-        } catch (ValidateException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        } catch (NotFoundRecordInBD ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
-        return ResponseEntity.ok(updatedFilm);
+        return ResponseEntity.ok(filmService.updateFilm(film));
     }
     
     

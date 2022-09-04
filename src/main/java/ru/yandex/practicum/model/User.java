@@ -3,9 +3,6 @@ package ru.yandex.practicum.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
 import java.time.LocalDate;
 
 /**
@@ -29,16 +26,16 @@ public class User {
     
     Integer id;
     
-    @Email
-    @NotBlank
+    //@Email
+    //@NotBlank
     String email;
     
-    @NotBlank
+    //@NotBlank
     String login;
     
     String name;
     
-    @Past
+    //@Past
     LocalDate birthday;
     
     public static Integer getCount() {
