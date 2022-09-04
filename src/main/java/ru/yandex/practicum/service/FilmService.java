@@ -42,12 +42,18 @@ public class FilmService {
         try {
             //Проверяем необходимые поля.
             checkFilm(film);
-            
-            if (setUniqueIdForFilmFromCount(film)) {
+        } catch (ValidateException ex) {
+            String error = "Ошибка добавления фильма в библиотеку. Подробное описание ошибки:\t"
+                    + ex.getMessage();
+            log.error(error);
+            throw new ValidateException(error);
+        }
+    
+        if (setUniqueIdForFilmFromCount(film)) {
                 //Если ID входящего фильма был присвоен, значит фильма нет в библиотеке
                 log.info("Создана новая запись в библиотеке о фильме с названием: '"
                         + film.getName() + "' и ID = " + film.getId() + ".");
-                return inMemoryFilmStorage.create(film);
+                return inMemoryFilmStorage.createInStorage(film);
                 
             } else if (inMemoryFilmStorage.getFilmById(film.getId()) != null) {
                 //В библиотеке есть фильм с ID входящего фильма.
@@ -60,17 +66,9 @@ public class FilmService {
                 //Поступил фильм со всеми входными параметрами, который был добавлен в библиотеку.
                 log.info("Создана новая запись о фильме из 'полного' объекта в теле запроса. " +
                         "В запросе были все необходимые поля.");
-                return inMemoryFilmStorage.create(film);
+                return inMemoryFilmStorage.createInStorage(film);
             }
             
-        } catch (ValidateException ex) {
-            // TODO: 2022.08.28 14:27:21 Проверить, нужен ли здесь try-catch - @Dmitriy_Gaju
-            // TODO: 2022.09.04 03:29:26 Не работает контроллер обработки ошибок. - @Dmitriy_Gaju
-            String error = "Ошибка добавления фильма в библиотеку. Подробное описание ошибки:\t"
-                    + ex.getMessage();
-            log.error(error);
-            throw new ValidateException(error);
-        }
     }
     
     /**
@@ -88,7 +86,7 @@ public class FilmService {
                 //Если ID входящего фильма был присвоен, значит фильма нет в библиотеке
                 log.info("При обновлении создана новая запись в библиотеке о фильме с названием: '"
                         + film.getName() + "'.");
-                return inMemoryFilmStorage.create(film);
+                return inMemoryFilmStorage.createInStorage(film);
                 
             } else if (inMemoryFilmStorage.getFilmById(film.getId()) != null) {
                 //В библиотеке есть фильм с ID входящего фильма.
@@ -111,13 +109,19 @@ public class FilmService {
         }
     }
     
+    // TODO: 2022.09.05 02:40:26 Закончил здесь. Надо продолжить. - @Dmitriy_Gaju
+/*
+    public void addLikeForFilm(Integer id) {
+        if ()
+    }
+*/
     
     /**
-     * Для Film:
-     * <p>название не может быть пустым;</p>
-     * <p>максимальная длина описания — 200 символов;</p>
-     * <p>дата релиза — не раньше 28 декабря 1895 года;</p>
-     * <p>продолжительность фильма должна быть положительной.</p>
+     * Проверка удовлетворения полей объекта Film требуемым параметрам:
+     * <p>* название не может быть пустым;</p>
+     * <p>* максимальная длина описания — 200 символов;</p>
+     * <p>* дата релиза — не раньше 28 декабря 1895 года;</p>
+     * <p>* продолжительность фильма должна быть положительной.</p>
      *
      * @param film фильм, который необходимо проверить.
      * @throws ValidateException в объекте фильма есть ошибки.

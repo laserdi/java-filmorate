@@ -1,9 +1,12 @@
 package ru.yandex.practicum.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Getter
@@ -34,6 +37,13 @@ public class Film {
     @Positive
     Integer duration;
     
+    @JsonIgnore
+    Set<Integer> likes = new HashSet<>();
+    
+    /**
+     * Метод генерации счётчика.
+     * @return целое число.
+     */
     public static Integer getCount() {
         return count++;
     }

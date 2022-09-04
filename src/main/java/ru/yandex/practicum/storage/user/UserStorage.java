@@ -54,5 +54,4 @@ public interface UserStorage {
      * <p>null - пользователя нет в библиотеке.</p>
      */
     User getUserByLogin(String login);
-    
 }

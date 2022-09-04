@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * целочисленный идентификатор — id;
@@ -37,6 +39,10 @@ public class User {
     
     //@Past
     LocalDate birthday;
+    
+    //ID друзей
+    @JsonIgnore
+    Set<Integer> idsFriends = new HashSet<>();
     
     public static Integer getCount() {
         return count++;

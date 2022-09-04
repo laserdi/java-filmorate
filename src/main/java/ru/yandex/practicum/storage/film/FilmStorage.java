@@ -12,7 +12,7 @@ public interface FilmStorage {
      * @param film из тела запроса.
      * @return статус состояния на запрос и тело ответа (созданный фильм или ошибка).
      */
-    Film create(Film film);
+    Film createInStorage(Film film);
     
     /**
      * Обновление информации о существующем фильме.

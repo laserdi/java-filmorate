@@ -7,6 +7,7 @@ import ru.yandex.practicum.model.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -86,4 +87,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User getUserByLogin(String login) {
         return users.values().stream().filter(u -> u.getLogin().equals(login)).findFirst().orElse(null);
     }
+    
+    
+    
 }

@@ -32,7 +32,7 @@ public class InMemoryFilmStorage implements FilmStorage {
      * @return добавленный фильм.
      */
     @Override
-    public Film create(Film film) {
+    public Film createInStorage(Film film) {
         films.put(film.getId(), film);
         return film;
     }
