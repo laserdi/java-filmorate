@@ -14,6 +14,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+
+//******************Добрый день, этот файл не готов.
+//******************Его проверять не надо.
+
 class UserControllerTest2 {
     UserController controller;
     User userIsCorrectly = User.builder().id(0).email("email@email").login("login").name("name")

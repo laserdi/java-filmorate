@@ -31,6 +31,12 @@ public class UserService {
      * <p>null - пользователя нет в библиотеке.</p>
      */
     public User getUserById(Integer id) {
+        User result = inMemoryUStorage.getUserById(id);
+        if (result == null) {
+            String error = "В БД отсутствует запись о пользователе при получении пользователя по ID = " + id + ".";
+            log.error(error);
+            throw new NotFoundRecordInBD(error);
+        }
         return inMemoryUStorage.getUserById(id);
     }
     
@@ -188,6 +194,7 @@ public class UserService {
         
         addToStorage(friend1);
         addToStorage(friend2);
+        log.info("Пользователь с ID = " + id1 + " подружился с пользователем с ID = " + id2 + ".");
     }
     
     /**
@@ -217,6 +224,7 @@ public class UserService {
         
         addToStorage(friend1);
         addToStorage(friend2);
+        log.info("Дружба пользователя (ID = " + id1 + ") с пользователем (ID = " + id2 + ") завершена )-;");
     }
     
     /**

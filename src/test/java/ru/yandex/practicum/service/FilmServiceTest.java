@@ -8,6 +8,8 @@ import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.storage.film.FilmStorage;
 import ru.yandex.practicum.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmServiceTest {
     Film filmIsCorrectly;
     FilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
-    FilmService filmService = new FilmService(inMemoryFilmStorage);
+    UserStorage inMemoryUserStorage = new InMemoryUserStorage();
+    FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
     List<Film> expectedFilmList;
     
     @BeforeEach

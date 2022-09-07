@@ -1,31 +1,24 @@
 package ru.yandex.practicum.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.yandex.practicum.model.User;
-import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.service.UserService;
-import ru.yandex.practicum.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+//******************Добрый день, этот файл не готов.
+//******************Его проверять не надо.
 /**
  * <p>электронная почта не может быть пустой и должна содержать символ @;</p>
  * <p>логин не может быть пустым и содержать пробелы;</p>
@@ -51,32 +44,19 @@ class UserControllerTest {
     @MockBean
     private UserStorage userStorage;
     
-//    @MockBean
-//    UserController userController;
     
     User userIsCorrectly = User.builder().id(0).email("email@email").login("login").name("name")
             .birthday(LocalDate.of(2000, 1, 3)).build();
     
     
-/*
-    @BeforeEach
-    void setup() {
-        userIsCorrectly = User.builder().id(0).email("email@email").login("login").name("name")
-                .birthday(LocalDate.of(2000, 1, 3)).build();
-        
-//        UserStorage userStorage = new InMemoryUserStorage();
-//        userService = new UserService(userStorage);
-//        userController = new UserController(userService);
-        expectedUserList = new ArrayList<>();
-        
-    }
-*/
     
     
     //электронная почта не может быть пустой и должна содержать символ @;
     @Test
     public void createdUserWithFailEmail() throws Exception {
 //
+        
+        User userEmailIsNull2 = new User(0, null, "login", "name", LocalDate.of(2000, 1, 5), null);
         User userEmailIsNull = userIsCorrectly.toBuilder().email(null).build();
         User userEmailIsEmpty = userIsCorrectly.toBuilder().id(1).email("").build();
         User userEmailIsBlank = userIsCorrectly.toBuilder().id(2).email(" ").build();
@@ -93,13 +73,13 @@ class UserControllerTest {
         assertThrows(ValidateException.class, ()->userController.createUser(userEmailWithoutSobaka));
 */
     
-        System.out.println(objectMapper.writeValueAsString(userEmailIsNull));
+        System.out.println(objectMapper.writeValueAsString(userEmailIsNull2));
         MvcResult mvcResult = mockMvc.perform(post("/users")
                         .contentType("application/Json")
-                        .content(objectMapper.writeValueAsString(userEmailIsNull)))
-                .andExpect(status().isBadRequest())
+                        .content(objectMapper.writeValueAsString(userEmailIsNull2)))
+                .andExpect(status().isOk())
                 .andReturn();
-        //assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(400, mvcResult.getResponse().getStatus());
         
         
 /*

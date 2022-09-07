@@ -7,12 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.exception.NotFoundRecordInBD;
-import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.service.FilmService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -36,6 +33,11 @@ public class FilmController {
     }
     
     static final String PATH_FOR_FILMS = "/films";
+    private static final String PATH_FOR_POPULAR = "/popular";
+    private static final String PATH_FOR_LIKE = "/like";
+    private static final String PATH_FOR_ID_VARIABLE = "/{id}";
+    private static final String PATH_FOR_USER_ID_VARIABLE = "/{userId}";
+    
     
     /**
      * Получение списка всех фильмов.
@@ -70,43 +72,61 @@ public class FilmController {
         return ResponseEntity.ok(filmService.updateFilm(film));
     }
     
+    /**
+     * PUT /films/{id}/like/{userId}
+     *
+     * @param id ID запрашиваемого фильма.
+     * @return фильм или исключение 'NotFoundRecordInBD'.
+     */
+    @GetMapping(PATH_FOR_FILMS + PATH_FOR_ID_VARIABLE)
+    public Film getFilmById(@PathVariable Integer id) {
+        log.info("Выдан ответ на запрос фильма по ID.");
+        return filmService.getFilmByID(id);
+    }
     
     /**
-     * Для Film:
-     * <p>название не может быть пустым;</p>
-     * <p>максимальная длина описания — 200 символов;</p>
-     * <p>дата релиза — не раньше 28 декабря 1895 года;</p>
-     * <p>продолжительность фильма должна быть положительной.</p>
+     * PUT /films/{id}/like/{userId} — пользователь ставит лайк фильму.
      *
-     * @param film фильм, который необходимо проверить.
-     * @throws ValidateException в объекте фильма есть ошибки.
+     * @param id     ID фильма, которому ставится лайк.
+     * @param userId ID пользователя, ставящего лайк.
+     * @return сообщение об успешной установке лайка или генерация исключения 'NotFoundRecordInBD'.
      */
-    public void checkFilm(Film film) throws ValidateException {
-        Integer id = film.getId();
-        String name = film.getName();
-        String description = film.getDescription();
-        LocalDate releaseDate = film.getReleaseDate();
-        Integer duration = film.getDuration();
-        
-        if (id == null) {
-            log.info("chekFilm(): ID фильма = null.");
-        }
-        
-        if (name == null || name.isEmpty() || name.isBlank()) {
-            throw new ValidateException("chekFilm(): Отсутствует название фильма.");
-        }
-        
-        if (description != null && description.length() > 200) {
-            throw new ValidateException("chekFilm(): Максимальная длина описания фильма должна быть не более" +
-                    " 200 символов.");
-        }
-        
-        if (releaseDate == null || releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidateException("chekFilm(): Дата релиза должна быть не раньше 28 декабря 1895 года.");
-        }
-        
-        if (duration != null && duration <= 0) {
-            throw new ValidateException("chekFilm(): Продолжительность фильма должна быть положительной.");
-        }
+    @PutMapping(PATH_FOR_FILMS + PATH_FOR_ID_VARIABLE + PATH_FOR_LIKE
+            + PATH_FOR_USER_ID_VARIABLE)
+    public ResponseEntity<?> addLikeForFilm(@PathVariable Integer id, @PathVariable Integer userId) {
+        filmService.addLikeForFilm(id, userId);
+        String message = "Лайк фильму (ID = " + id + ") установлен пользователем (ID = " + userId + ").";
+        log.info(message);
+        return ResponseEntity.ok(message);
+    }
+    
+    
+    /**
+     * Метод для удаления лайка фильму.
+     * DELETE /films/{id}/like/{userId} — пользователь удаляет лайк.
+     *
+     * @param id     ID пользователя, удаляющего лайк.
+     * @param userId ID фильма, которому поставили лайк.
+     */
+    @DeleteMapping(PATH_FOR_FILMS + PATH_FOR_ID_VARIABLE + PATH_FOR_LIKE + PATH_FOR_USER_ID_VARIABLE)
+    public ResponseEntity<?> deleteLikeForFilm(@PathVariable Integer id, @PathVariable Integer userId) {
+        filmService.deleteLikeForFilm(id, userId);
+        String message = "Пользователем (ID = " + userId + ") выполнено удаление лайка фильму (ID = " + id + ").";
+        log.info(message);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(message);
+    }
+    
+    /**
+     * GET /films/popular?count={count} — возвращает список из первых count фильмов по количеству лайков.
+     * Если значение параметра count не задано, верните первые 10.
+     *
+     * @param count необязательный параметр - размер возвращаемого списка фильмов. (если нет, то 10).
+     * @return список популярных фильмов.
+     */
+    @GetMapping(PATH_FOR_FILMS + PATH_FOR_POPULAR)
+    public List<Film> getPopularFilms(@RequestParam(required = false) Integer count) {
+        List<Film> popularFilms = filmService.getPopularFilm(count);
+        log.info("Выдан ответ на запрос о выдаче списка популярных фильмов.");
+        return popularFilms;
     }
 }
