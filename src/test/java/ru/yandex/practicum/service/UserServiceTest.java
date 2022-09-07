@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.exception.ValidateException;
-import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.storage.user.UserStorage;

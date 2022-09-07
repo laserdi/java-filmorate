@@ -28,16 +28,12 @@ public class User {
     
     Integer id;
     
-    //@Email
-    //@NotBlank
     String email;
     
-    //@NotBlank
     String login;
     
     String name;
     
-    //@Past
     LocalDate birthday;
     
     //ID друзей

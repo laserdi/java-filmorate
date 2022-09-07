@@ -3,8 +3,6 @@ package ru.yandex.practicum.controller;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ApplicationContext;
 import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.model.User;
 
@@ -12,8 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 //******************Добрый день, этот файл не готов.
