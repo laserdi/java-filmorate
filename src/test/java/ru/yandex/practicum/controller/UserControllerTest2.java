@@ -1,3 +1,8 @@
+/*
+//******************Добрый день, этот файл не готов.
+//******************Его проверять не надо.
+
+
 package ru.yandex.practicum.controller;
 
 import org.junit.jupiter.api.AfterEach;
@@ -13,8 +18,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
-//******************Добрый день, этот файл не готов.
-//******************Его проверять не надо.
 
 class UserControllerTest2 {
     UserController controller;
@@ -22,10 +25,12 @@ class UserControllerTest2 {
             .birthday(LocalDate.of(2000, 1, 3)).build();
     @BeforeEach
     void setUp() {
+*/
 /*
         ApplicationContext context = SpringApplication.run(UserControllerTest2.class);
         UserController controller = context.getBean(UserController.class);
-*/
+*//*
+
     }
     
     @AfterEach
@@ -51,4 +56,4 @@ class UserControllerTest2 {
     @Test
     void updateUser() {
     }
-}
+}*/
