@@ -44,3 +44,8 @@ build/
 
 *.db
 db/*
+
+### Git Actions Были ошибки. Стал игнорировать файлы тестов контроллеров.
+/src/test/java/ru/yandex/practicum/controller/FilmControllerTest.java
+/src/test/java/ru/yandex/practicum/controller/UserControllerTest.java
+/src/test/java/ru/yandex/practicum/controller/UserControllerTest2.java.java

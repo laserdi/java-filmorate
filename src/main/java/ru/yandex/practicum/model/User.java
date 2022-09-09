@@ -1,10 +1,11 @@
 package ru.yandex.practicum.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * целочисленный идентификатор — id;
@@ -13,18 +14,31 @@ import java.time.LocalDate;
  * <p>имя для отображения — name;</p>
  * <p>дата рождения — birthday.</p>
  */
-@Data
+@Getter
+@Setter
 @Builder(toBuilder = true)
-//@NoArgsConstructor
-//@AllArgsConstructor
+@ToString
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
+    
+    @JsonIgnore
     static Integer count = 1;
-    @Builder.Default
-    Integer id = count;
+    
+    Integer id;
+    
     String email;
+    
     String login;
+    
     String name;
+    
     LocalDate birthday;
+    
+    //ID друзей
+    @JsonIgnore
+    Set<Integer> idsFriends = new HashSet<>();
     
     public static Integer getCount() {
         return count++;
