@@ -2,6 +2,7 @@ package ru.yandex.practicum.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.exception.ValidateException;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage inMemoryFilmStorage;
     private final UserStorage inMemoryUserStorage;
+    
+    @Value("23245")
+    Integer x;
     
     @Autowired
     public FilmService(FilmStorage inMemoryFilmStorage, UserStorage inMemoryUserStorage) {
@@ -44,8 +48,6 @@ public class FilmService {
      * @return статус состояния на запрос и тело ответа (созданный фильм или ошибка).
      */
     public Film createFilm(Film film) throws NotFoundRecordInBD, ValidateException {
-        // TODO: 2022.08.28 14:09:17 Нужны ли исключения в сигнатуре? чтобы проверить код ответа при ошибке - @Dmitriy_Gaju
-        // TODO: 2022.09.04 03:28:37 Не работает контроллер обработки ошибок. - @Dmitriy_Gaju
         try {
             //Проверяем необходимые поля.
             checkFilm(film);
@@ -116,8 +118,6 @@ public class FilmService {
         }
     }
     
-    // TODO: 2022.09.05 02:40:26 Закончил здесь. Надо продолжить. - @Dmitriy_Gaju
-    
     /**
      * Метод для установки лайков фильму.
      *
@@ -171,12 +171,12 @@ public class FilmService {
     
     /**
      * Получить список самых популярных фильмов (больше лайков).
+     *
      * @param count необязательный параметр - размер возвращаемого списка фильмов. (если нет, то 10).
      * @return список популярных фильмов.
      */
     public List<Film> getPopularFilm(Integer count) {
-        int size;
-        size = Objects.requireNonNullElse(count, 10); //Если count2 = null, тогда size = 10
+        int size = Objects.requireNonNullElse(count, 10); //Если count = null, тогда size = 10
         return inMemoryFilmStorage.getAllFilms().stream()
                 .sorted(Comparator.comparing(f -> -f.getLikes().size()))
                 .limit(size)
@@ -193,35 +193,34 @@ public class FilmService {
      * @param film фильм, который необходимо проверить.
      * @throws ValidateException в объекте фильма есть ошибки.
      */
-    public void checkFilm(Film film) throws ValidateException {
-        Integer id = film.getId();
-        String name = film.getName();
-        String description = film.getDescription();
-        LocalDate releaseDate = film.getReleaseDate();
-        Integer duration = film.getDuration();
+    private void checkFilm(Film film) throws ValidateException {
+        final Integer ID = film.getId();
+        final String NAME = film.getName();
+        final String DESCRIPTION = film.getDescription();
+        final LocalDate RELEASE_DATE = film.getReleaseDate();
+        final Integer DURATION = film.getDuration();
         
-        if (id == null) {
+        if (ID == null) {
             log.info("checkFilm(): ID фильма = null.");
         }
         //название не может быть пустым;
-        if (name == null || name.isEmpty() || name.isBlank()) {
+        if (NAME == null || NAME.isEmpty() || NAME.isBlank()) {
             throw new ValidateException("checkFilm(): Отсутствует название фильма.");
         }
         //максимальная длина описания — 200 символов;
-        if (description != null && description.length() > 200) {
+        if (DESCRIPTION != null && DESCRIPTION.length() > 200) {
             throw new ValidateException("checkFilm(): Максимальная длина описания фильма должна быть не более" +
                     " 200 символов.");
         }
         //дата релиза — не раньше 28 декабря 1895 года;
-        if (releaseDate != null && releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
+        if (RELEASE_DATE != null && RELEASE_DATE.isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidateException("checkFilm(): Дата релиза должна быть не раньше 28 декабря 1895 года.");
         }
         //продолжительность фильма должна быть положительной.
-        if (duration != null && duration <= 0) {
+        if (DURATION != null && DURATION <= 0) {
             throw new ValidateException("checkFilm(): Продолжительность фильма должна быть положительной.");
         }
     }
-    
     
     
     /**
@@ -255,31 +254,13 @@ public class FilmService {
     
     
     /**
-     * Метод проверки наличия фильма в библиотеке по названию фильма.
-     * <p>Этот метод скорее всего не нужен, поскольку в БД могут быть одинаковые названия фильмов.</p>
-     *
-     * @param film фильм, наличие названия которого необходимо проверить в базе данных.
-     * @return ID, найденный в БД по названию.
-     * Если возвращается не null, то после этой проверки можно обновлять фильм,
-     * присвоив ему ID из базы данных.
-     * <p>null - фильма нет в базе данных.</p>
-     */
-    private Integer idFromDBByName(Film film) {
-        String name = film.getName();
-        return inMemoryFilmStorage.getAllFilms().stream().filter(f -> f.getName().equals(name))
-                .findFirst().map(Film::getId)
-                .orElse(null);
-    }
-    
-    
-    /**
      * Метод присвоения фильму уникального ID, если ID не задан.
      *
      * @param film обрабатываемый фильм.
      * @return True - уникальный ID присвоен.
      * <p>False - уникальный ID у фильма был.</p>
      */
-    public boolean setUniqueIdForFilmFromCount(Film film) {
+    private boolean setUniqueIdForFilmFromCount(Film film) {
         if (film.getId() != null) {
             log.info("Уникальный ID фильму не нужен. Изначальный ID = " + film.getId());
             return false;

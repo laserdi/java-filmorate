@@ -47,7 +47,7 @@ public class UserController {
      * Получение списка всех пользователей.
      */
 //    @Override
-    @GetMapping(PATH_FOR_USERS)
+    @GetMapping("/users")
     public List<User> getAllUsers() {
         log.info("Выдан ответ на запрос всех пользователей.");
         return userService.getAllUsers();
@@ -59,7 +59,7 @@ public class UserController {
      * @param user из тела запроса.
      * @return созданный пользователь.
      */
-    @PostMapping(PATH_FOR_USERS)
+    @PostMapping("/users")
     public ResponseEntity<?> createUser(@Validated @RequestBody User user) {
         User createdUser = userService.addToStorage(user);
         log.info("Выдан ответ на запрос создания пользователя: {}", createdUser);
@@ -73,7 +73,7 @@ public class UserController {
      * @param user обновляемый пользователь.
      * @return ответ о совершённом действии.
      */
-    @PutMapping(PATH_FOR_USERS)
+    @PutMapping("/users")
     public ResponseEntity<?> updateUser(@RequestBody User user) {
         User updatedUser = userService.updateInStorage(user);
         return ResponseEntity.ok(updatedUser);
@@ -85,12 +85,11 @@ public class UserController {
      * @param id ID пользователя.
      * @return null, если пользователь не найден в БД.
      */
-    @GetMapping(PATH_FOR_USERS + PATH_FOR_ID_VARIABLE)
+    @GetMapping("/users" + "/{id}")
     public User getUser(@PathVariable Integer id) {
         log.info("Выдан ответ на запрос пользователя по ID = " + id + ".");
         return userService.getUserById(id);
     }
-    
     
     /**
      * PUT /users/{id}/friends/{friendId} — добавление в друзья.
@@ -99,14 +98,13 @@ public class UserController {
      * @param friendId ID будущего друга.
      * @return Запрос на дружбу с пользователем (ID = friendId) успешно обработан.
      */
-    @PutMapping(PATH_FOR_USERS + PATH_FOR_ID_VARIABLE + PATH_FOR_FRIENDS + PATH_FOR_FRIENDS_ID_VARIABLE)
+    @PutMapping("/users" + "/{id}" + "/friends" + "/{friendId}")
     public ResponseEntity<?> addEachOtherAsFriends(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.addEachOtherAsFriends(id, friendId);
         log.info("Пользователь (ID = " + id + ") подружился с пользователем (ID = " + friendId + ").");
         return ResponseEntity.status(HttpStatus.OK).body("Запрос на дружбу с пользователем (ID = "
                 + friendId + ") успешно обработан.");
     }
-    
     
     /**
      * DELETE /users/{id}/friends/{friendId} — удаление из друзей.
@@ -115,7 +113,7 @@ public class UserController {
      * @param friendId ID бывшего друга.
      * @return Запрос на завершение дружбы с пользователем (ID = friendId) успешно обработан.
      */
-    @DeleteMapping(PATH_FOR_USERS + PATH_FOR_ID_VARIABLE + PATH_FOR_FRIENDS + PATH_FOR_FRIENDS_ID_VARIABLE)
+    @DeleteMapping("/users" + "/{id}" + "/friends" + "/{friendId}")
     public ResponseEntity<?> deleteFromFriends(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.deleteFromFriends(id, friendId);
         log.info("Грусть. Дружба пользователя (ID = " + id + ") с пользователем (ID = " + friendId + ") завершена )-;");
@@ -125,10 +123,11 @@ public class UserController {
     
     /**
      * GET /users/{id}/friends — возвращаем список пользователей, являющихся его друзьями.
-     * @param id ID пользователя, для которого необходимо найти друзей.
+     *
+     * @param id ID пользователя, для которого необходимо найти список друзей.
      * @return список друзей.
      */
-    @GetMapping(PATH_FOR_USERS + PATH_FOR_ID_VARIABLE + PATH_FOR_FRIENDS)
+    @GetMapping("/users" + "/{id}" + "/friends")
     public List<User> getUserFriends(@PathVariable Integer id) {
         List<User> result = userService.getUserFriends(id);
         log.info("Выдан ответ на запрос информации о друзьях пользователя с ID = " + id);
@@ -137,13 +136,13 @@ public class UserController {
     
     /**
      * GET /users/{id}/friends/common/{otherId} — список друзей, общих с другим пользователем.
-     * @param id ID пользователя №1.
+     *
+     * @param id      ID пользователя №1.
      * @param otherId ID пользователя №2.
      * @return список общих друзей.
      */
-    @GetMapping(PATH_FOR_USERS + PATH_FOR_ID_VARIABLE + PATH_FOR_FRIENDS + PATH_FOR_COMMON
-            + PATH_FOR_OTHER_ID_VARIABLE)
-    public List<User> getCommonFriends (@PathVariable Integer id, @PathVariable Integer otherId) {
+    @GetMapping("/users" + "/{id}" + "/friends" + "/common" + "/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         List<User> result = userService.getCommonFriends(id, otherId);
         log.info("Выдан ответ на запрос информации об общих друзьях пользователя с ID = " + otherId);
         return result;

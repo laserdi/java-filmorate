@@ -44,7 +44,7 @@ public class FilmController {
      *
      * @return список фильмов.
      */
-    @GetMapping(PATH_FOR_FILMS)
+    @GetMapping("/films")
     public List<Film> getAllFilms() {
         log.info("Выдан ответ на запрос всех фильмов.");
         return filmService.getAllFilms();
@@ -56,7 +56,7 @@ public class FilmController {
      * @param film из тела запроса.
      * @return статус состояния на запрос и тело ответа (созданный фильм или ошибка).
      */
-    @PostMapping(PATH_FOR_FILMS)
+    @PostMapping("/films")
     public ResponseEntity<?> createFilm(@RequestBody Film film) {
         return ResponseEntity.ok(filmService.createFilm(film));
     }
@@ -67,7 +67,7 @@ public class FilmController {
      * @param film обновляемый фильм.
      * @return ответ о совершённом действии.
      */
-    @PutMapping(PATH_FOR_FILMS)
+    @PutMapping("/films")
     public ResponseEntity<?> updateFilm(@RequestBody Film film) {
         return ResponseEntity.ok(filmService.updateFilm(film));
     }
@@ -78,7 +78,7 @@ public class FilmController {
      * @param id ID запрашиваемого фильма.
      * @return фильм или исключение 'NotFoundRecordInBD'.
      */
-    @GetMapping(PATH_FOR_FILMS + PATH_FOR_ID_VARIABLE)
+    @GetMapping("/films" + "/{id}")
     public Film getFilmById(@PathVariable Integer id) {
         log.info("Выдан ответ на запрос фильма по ID.");
         return filmService.getFilmByID(id);
@@ -91,8 +91,7 @@ public class FilmController {
      * @param userId ID пользователя, ставящего лайк.
      * @return сообщение об успешной установке лайка или генерация исключения 'NotFoundRecordInBD'.
      */
-    @PutMapping(PATH_FOR_FILMS + PATH_FOR_ID_VARIABLE + PATH_FOR_LIKE
-            + PATH_FOR_USER_ID_VARIABLE)
+    @PutMapping("/films/{id}/like/{userId}")
     public ResponseEntity<?> addLikeForFilm(@PathVariable Integer id, @PathVariable Integer userId) {
         filmService.addLikeForFilm(id, userId);
         String message = "Лайк фильму (ID = " + id + ") установлен пользователем (ID = " + userId + ").";
@@ -108,7 +107,7 @@ public class FilmController {
      * @param id     ID пользователя, удаляющего лайк.
      * @param userId ID фильма, которому поставили лайк.
      */
-    @DeleteMapping(PATH_FOR_FILMS + PATH_FOR_ID_VARIABLE + PATH_FOR_LIKE + PATH_FOR_USER_ID_VARIABLE)
+    @DeleteMapping("/films/{id}/like/{userId}")
     public ResponseEntity<?> deleteLikeForFilm(@PathVariable Integer id, @PathVariable Integer userId) {
         filmService.deleteLikeForFilm(id, userId);
         String message = "Пользователем (ID = " + userId + ") выполнено удаление лайка фильму (ID = " + id + ").";
@@ -123,7 +122,7 @@ public class FilmController {
      * @param count необязательный параметр - размер возвращаемого списка фильмов. (если нет, то 10).
      * @return список популярных фильмов.
      */
-    @GetMapping(PATH_FOR_FILMS + PATH_FOR_POPULAR)
+    @GetMapping("/films/popular")
     public List<Film> getPopularFilms(@RequestParam(required = false) Integer count) {
         List<Film> popularFilms = filmService.getPopularFilm(count);
         log.info("Выдан ответ на запрос о выдаче списка популярных фильмов.");
