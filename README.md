@@ -1,6 +1,6 @@
 # `java-filmorate`
 Template repository for `Filmorate` project.
-
+Изменена ветка для самопроверки на add-database-diagram
 ##Sprint 11 Final. round 1.   
 ###Film
 ####Добавьте новое свойство — «жанр».  
