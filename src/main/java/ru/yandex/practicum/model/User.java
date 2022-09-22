@@ -43,4 +43,28 @@ public class User {
     public static Integer getCount() {
         return count++;
     }
+    
+    /**
+     * Есть ли в списке друзей друг с ID = id?
+     * @param id ID друга.
+     * @return True - есть, False - нет.
+     */
+    public boolean containsFriend(Integer id) {
+        return idsFriends.contains(id);
+    }
+    
+    /**
+     * Добавить ID друга в список друзей.
+     * @param id ID друга.
+     */
+    public void addIdFriend(Integer id) {
+        idsFriends.add(id);
+    }
+    /**
+     * Удалить ID друга из списка друзей.
+     * @param id ID друга.
+     */
+    public void removeIdFriend(Integer id) {
+        idsFriends.remove(id);
+    }
 }

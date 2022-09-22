@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.storage.user.UserStorage;
+import ru.yandex.practicum.storage.user.dao.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

@@ -1,12 +1,15 @@
 package ru.yandex.practicum.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.model.User;
-import ru.yandex.practicum.storage.user.UserStorage;
+import ru.yandex.practicum.storage.user.dao.UserStorage;
+import ru.yandex.practicum.storage.user.impl.UserDBStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,11 +19,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserService {
-    private final UserStorage inMemoryUStorage;
+    
+    @Qualifier("UserDBStorage")     //Используется для однозначности использования классов наследников интерфейса.
+    private final UserStorage userDBStorage;
+    private final ValidationService validationService;
+    
     
     @Autowired
-    public UserService(UserStorage inMemoryUserStorage) {
-        this.inMemoryUStorage = inMemoryUserStorage;
+    public UserService(UserStorage userDBStorage, ValidationService validationService) {
+        this.userDBStorage = userDBStorage;
+        this.validationService = validationService;
     }
     
     /**
@@ -31,13 +39,13 @@ public class UserService {
      * <p>null - пользователя нет в библиотеке.</p>
      */
     public User getUserById(Integer id) {
-        User result = inMemoryUStorage.getUserById(id);
+        User result = userDBStorage.getUserById(id);
         if (result == null) {
             String error = "В БД отсутствует запись о пользователе при получении пользователя по ID = " + id + ".";
             log.error(error);
             throw new NotFoundRecordInBD(error);
         }
-        return inMemoryUStorage.getUserById(id);
+        return result;
     }
     
     /**
@@ -46,7 +54,7 @@ public class UserService {
      * @return Список пользователей.
      */
     public List<User> getAllUsers() {
-        return inMemoryUStorage.getAllUsersFromStorage();
+        return userDBStorage.getAllUsersFromStorage();
     }
     
     
@@ -58,45 +66,10 @@ public class UserService {
      */
     public User addToStorage(User user) throws ValidateException, NotFoundRecordInBD {
         
-        //Проверяем необходимые поля.
-        checkUser(user);
-        //Если имя пустое, то оно равно логину.
-        nameSetAsLogin(user);
-        
-        //ID, найденный в БД по логину:
-        Integer idFromDB = idFromDBByLogin(user);
-        
-        if (idFromDB != null) {
-            
-            if (user.getId() == null || user.getId().equals(idFromDB)) {
-                //Проверяем ID входящего пользователя. Если он null или равен ID, найденному в БД по логину:
-                //будет обновление существующего пользователя.
-                user.setId(idFromDB);       //операция необходима при user.getId() == null.
-                String message = "В результате добавления пользователя в БД обновлён существующий пользователь " +
-                        "с логином = '" + user.getLogin() + "'." + user;
-                log.info(message);
-                return inMemoryUStorage.updateInStorage(user);
-            } else {
-                //Если ID входящего пользователя не null и не равен ID из БД,
-                // значит ошибка в запросе, поскольку,
-                // возможно, требуется обновление существующего пользователя.
-                String error = "Ошибка добавления пользователя в БД. ID = '" + user.getId()
-                        + "' входящего пользователя с логином '" + user.getLogin()
-                        + "' не равен ID = '" + idFromDB + "' из БД пользователей. ";
-                log.error(error);
-                throw new NotFoundRecordInBD(error);
-            }
-            
-        }
-        
-        //Получается, что пришёл "новый" пользователь, логина которого нет в БД.
-        //И, если с пустым ID, то, сразу же его заполним.
-        setUniqueIdForUserFromCount(user);
-        
-        String message = "В результате добавления пользователя в БД добавлен новый пользователь:\t" + user;
-        log.info(message);
-        return inMemoryUStorage.addToStorage(user);
-        
+        // TODO: 2022.09.21 02:20:26 Удалить старый UserServiceOld - @Dmitriy_Gaju
+        //Проверяем необходимые поля, и, если имя пустое, то оно равно логину.
+        validationService.checkUser(user);
+        return userDBStorage.addToStorage(user);
     }
     
     /**
@@ -106,70 +79,25 @@ public class UserService {
      * @return обновлённый пользователь.
      */
     public User updateInStorage(User user) {
-        //Проверяем необходимые поля.
-        checkUser(user);
-        
-        User userTemp = user.toBuilder().build(); //Делаем копию юзера для дальнейшей обработки.
-        nameSetAsLogin(userTemp);
-        Integer idFromDB = idFromDBByLogin(userTemp);
-        if (idFromDB != null) {
-            //********** Пользователь по логину присутствует в БД.
-            if (userTemp.getId() == null || userTemp.getId().equals(idFromDB)) {
-                //ID входящего пользователя равен null или ID, найденному из БД по логину.
-                //Присваиваем входящему пользователю ID из БД.
-                userTemp.setId(idFromDB); //данная операция нужна только при ID входящего пользователя == null
-                String message = "Выполнено обновление существующей записи о пользователе с логином: '"
-                        + userTemp.getLogin() + "'.";
-                log.info(message);
-                return inMemoryUStorage.updateInStorage(userTemp);
-            } else {
-                String error = "Login пользователя есть в БД, но ID в БД (" + idFromDB
-                        + ") отличается от принимаемого '" + userTemp.getId() + "'.";
-                log.error(error);
-                throw new NotFoundRecordInBD(error);
-            }
-        }
-        
-        //********** Пользователь по логину отсутствует в БД.******************
-        if (userTemp.getId() == null) {
-            //Генерируем для входящего пользователя ID и добавляем нового пользователя в БД.
-            userTemp.setId(User.getCount());
-            
-            String message = "В результате обновления пользователя в БД добавлен новый пользователь:\t" + user;
-            log.info(message);
-            return inMemoryUStorage.addToStorage(userTemp);
-        } else if (inMemoryUStorage.getUserById(userTemp.getId()) != null) {
-            // иначе если ID пользователя есть в БД {
-            //      обновление логина пользователя -> обновляем запись в БД.
-            //старый логин:
-            String oldLogin = inMemoryUStorage.getUserById(userTemp.getId()).getLogin();
-            String newLogin = userTemp.getLogin();
-            log.info("Выполнено обновление учётной записи с изменением логина. " +
-                    "Был логин = '" + oldLogin + "', а стал - '" + newLogin + "'.");
-            return inMemoryUStorage.updateInStorage(userTemp);
-        } else {
-            //ID и Логина нет в БД. -> Не верный запрос.
-            String error = "В запросе на обновление пользователя ошибка. Login '" + userTemp.getLogin()
-                    + "'и ID = '" + userTemp.getId() + "' не найдены в БД.";
-            log.error(error);
-            throw new NotFoundRecordInBD(error);
-        }
+        //Проверяем необходимые поля, и, если имя пустое, то оно равно логину.
+        validationService.checkUser(user);
+        //Проверяем наличие записи о пользователе с ID = user.getId().
+        validationService.checkExistInDB(user.getId());
+        return userDBStorage.updateInStorage(user);
     }
     
     /**
      * Удалить пользователя из БД.
      *
-     * @param user пользователь
-     * @return True - удалён. False - не выполнено.
+     * @param id ID удаляемого пользователя
+     * @throws NotFoundRecordInBD из метода validationService.checkExistInDB(id).
      */
-    public User removeFromStorage(User user) {
-        User deletedUser = inMemoryUStorage.removeFromStorage(user);
-        if (deletedUser == null) {
-            String error = "При удалении пользователя из БД отсутствует запись об удаляемом пользователе.";
-            log.error(error + user.toString());
-            throw new NotFoundRecordInBD(error + "Проверьте передаваемые данные.");
-        }
-        return deletedUser;
+    public void removeFromStorage(Integer id) {
+        validationService.checkExistInDB(id);
+        //Если пользователь есть в БД, то идём далее.
+        userDBStorage.removeFromStorage(id);
+        String error = "Выполнено удаление пользователя  из БД с ID = '" + id + ".";
+        log.info(error);
     }
     
     
@@ -227,53 +155,6 @@ public class UserService {
         log.info("Дружба пользователя (ID = " + id1 + ") с пользователем (ID = " + id2 + ") завершена )-;");
     }
     
-    /**
-     * Проверка удовлетворения полей объекта User требуемым параметрам:
-     * <p>электронная почта не может быть пустой и должна содержать символ @;</p>
-     * <p>логин не может быть пустым и содержать пробелы;</p>
-     * <p>имя для отображения может быть пустым — в таком случае будет использован логин;</p>
-     * <p>дата рождения не может быть в будущем.</p>
-     *
-     * @param user пользователь, которого необходимо проверить.
-     * @throws ValidateException в объекте пользователя есть ошибки.
-     */
-    public void checkUser(User user) throws ValidateException {
-        Integer id = user.getId();
-        String email = user.getEmail();
-        String login = user.getLogin();
-        LocalDate birthday = user.getBirthday();
-        
-        if (id == null) log.info("checkUser(): ID пользователя = null.");
-        
-        //электронная почта не может быть пустой и должна содержать символ @;
-        if (email == null || email.isEmpty() || email.isBlank()) {
-            log.info("checkUser(): Не пройдена проверка 'пустоты' адреса электронной почты.");
-            throw new ValidateException("Адрес электронной почты не может быть пустым.");
-        }
-        if (!email.contains("@")) {
-            log.info("checkUser(): Не пройдена проверка наличия '@' в адресе электронной почты.");
-            throw new ValidateException("Адрес электронной почты должен содержать символ '@'.");
-        }
-        
-        //логин не может быть пустым и содержать пробелы;
-        if (login == null || login.isEmpty() || login.isBlank()) {
-            log.info("checkUser(): Не пройдена проверка наличия логина.");
-            throw new ValidateException("Отсутствует логин (" + login + ") пользователя.");
-        }
-        if (login.contains(" ")) {
-            log.info("checkUser(): Не пройдена проверка отсутствия пробелов в логине.");
-            throw new ValidateException("В логине не должно быть пробелов.");
-        }
-        
-        //дата рождения не может быть в будущем
-        if (birthday != null) {
-            if (birthday.isAfter(LocalDate.now())) {
-                log.info("checkUser(): Не пройдена проверка корректной даты рождения. Дата рождения ещё не наступила");
-                throw new ValidateException("checkUser(): Дата рождения ещё не наступила. " +
-                        "Введите корректную дату рождения.");
-            }
-        }
-    }
     
     /**
      * Метод проверки наличия пользователя в базе данных по логину.
@@ -286,7 +167,7 @@ public class UserService {
      */
     private Integer idFromDBByLogin(User user) {
         String login = user.getLogin();
-        return inMemoryUStorage.getAllUsersFromStorage().stream().filter(u -> u.getLogin().equals(login))
+        return userDBStorage.getAllUsersFromStorage().stream().filter(u -> u.getLogin().equals(login))
                 .findFirst().map(User::getId)
                 .orElse(null);
     }
@@ -352,6 +233,7 @@ public class UserService {
     
     // TODO: 2022.09.04 17:37:19 В будущем удалить дублирующий метод. Ещё к тому же
     //  недоделанный и плохо названный. - @Dmitriy_Gaju
+    
     /**
      * Метод проверки наличия пользователя в базе данных по ID.
      *
@@ -363,7 +245,7 @@ public class UserService {
      */
     private Integer idFromDBByID(Integer id) {
         
-        return inMemoryUStorage.getAllUsersFromStorage().stream().filter(u -> u.getId().equals(id))
+        return userDBStorage.getAllUsersFromStorage().stream().filter(u -> u.getId().equals(id))
                 .findFirst().map(User::getId)
                 .orElse(null);
     }
@@ -395,7 +277,7 @@ public class UserService {
         }
         while (true) {
             Integer count = User.getCount();
-            if (inMemoryUStorage.getUserById(count) == null) {
+            if (userDBStorage.getUserById(count) == null) {
                 user.setId(count);
                 log.info("Уникальный ID фильму присвоен. ID = " + user.getId());
                 return true;

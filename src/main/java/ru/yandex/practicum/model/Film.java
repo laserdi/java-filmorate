@@ -37,8 +37,14 @@ public class Film {
     @Positive
     Integer duration;
     
+    @NotNull
+    Mpa mpa;
+    
     @JsonIgnore
     Set<Integer> likes = new HashSet<>();
+    
+    @JsonIgnore
+    Set<Genre> genres = new HashSet<>();
     
     /**
      * Метод генерации счётчика.

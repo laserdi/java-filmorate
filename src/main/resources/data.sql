@@ -13,6 +13,7 @@ values (1, 'Комедия'),
        (5,'Документальный'),
        (6,'Боевик');
 
+-- merge into USERS (USER_ID, EMAIL, LOGIN, USER_NAME, BIRTHDAY) values (1, 'email@em.we', 'login', 'username', '2020-01-20' )
 
 /*
 select *

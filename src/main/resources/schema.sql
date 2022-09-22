@@ -1,3 +1,4 @@
+drop all objects;
 /*Создание таблицы пользователей*/
 CREATE TABLE IF NOT EXISTS users
 (

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.storage.film;
+package ru.yandex.practicum.storage.film.dao;
 
 import ru.yandex.practicum.model.Film;
 
@@ -7,12 +7,12 @@ import java.util.List;
 public interface FilmStorage {
     
     /**
-     * Создание фильма
+     * Создание фильма в хранилище.
      *
-     * @param film из тела запроса.
+     * @param film объект фильма.
      * @return статус состояния на запрос и тело ответа (созданный фильм или ошибка).
      */
-    Film createInStorage(Film film);
+    Film addInStorage(Film film);
     
     /**
      * Обновление информации о существующем фильме.
@@ -24,13 +24,15 @@ public interface FilmStorage {
     
     /**
      * Удалить фильм из библиотеки.
+     *
      * @param film - фильм.
-     * @return удалённый пользователь.
+     * @return удалённый фильм.
      */
-    Film removeFromLibrary(Film film);
+    Film removeFromStorage(Film film);
     
     /**
      * Вывести список всех фильмов.
+     *
      * @return список фильмов.
      */
     List<Film> getAllFilms();
@@ -42,7 +44,7 @@ public interface FilmStorage {
      * @return Film - фильм присутствует в библиотеке.
      * <p>null - фильма нет в библиотеке.</p>
      */
-
+    
     Film getFilmById(Integer id);
     
     Film getFilmByName(String name);

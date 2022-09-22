@@ -92,6 +92,20 @@ public class UserController {
     }
     
     /**
+     * Удаление пользователя из БД.
+     *
+     * @param userId удаляемы пользователь.
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable("id") Integer userId) {
+        userService.removeFromStorage(userId);
+        String message = "Выполнено удаление пользователя  из БД с ID = '" + userId + ".";
+        log.info(message);
+        return ResponseEntity.status(HttpStatus.OK).body(message);
+    }
+    
+    
+    /**
      * PUT /users/{id}/friends/{friendId} — добавление в друзья.
      *
      * @param id       ID инициатора дружбы.

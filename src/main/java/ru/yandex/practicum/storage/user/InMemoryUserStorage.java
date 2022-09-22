@@ -1,18 +1,20 @@
 package ru.yandex.practicum.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.model.User;
+import ru.yandex.practicum.storage.user.dao.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Component
+@Qualifier("InMemoryUserStorage")       //Используется для однозначности использования классов наследников интерфейса.
 public class InMemoryUserStorage implements UserStorage {
-     private final HashMap<Integer, User> users = new HashMap<>();
+    private final HashMap<Integer, User> users = new HashMap<>();
     
     /**
      * Получить список всех пользователей.
@@ -56,7 +58,6 @@ public class InMemoryUserStorage implements UserStorage {
      * @param user пользователь
      * @return True - удалён. False - не выполнено.
      */
-    @Override
     public User removeFromStorage(User user) {
         if (users.remove(user.getId(), user)) {
             return user;
@@ -89,5 +90,25 @@ public class InMemoryUserStorage implements UserStorage {
     }
     
     
+    /**
+     * Удалить пользователя из БД. True - удалено.
+     *
+     * @param id ID удаляемого пользователя.
+     */
+    @Override
+    public void removeFromStorage(Integer id) {
+        //Когда-нибудь надо будет сделать.
+    }
     
+    /**
+     * Проверка наличия юзера в БД.
+     *
+     * @param id пользователя.
+     * @return True - пользователь найден. False - пользователя нет в БД.
+     */
+    @Override
+    public boolean isExistInDB(Integer id) {
+        //Когда-нибудь надо будет сделать.
+        return false;
+    }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.service.FilmService;
+import ru.yandex.practicum.service.FilmServiceNew;
 
 import java.util.List;
 
@@ -26,10 +27,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
     FilmService filmService;
-    
+    FilmServiceNew filmServiceNew;
     @Autowired
-    public FilmController(FilmService filmService) {
+    public FilmController(FilmServiceNew filmServiceNew, FilmService filmService) {
         this.filmService = filmService;
+        this.filmServiceNew = filmServiceNew;
     }
     
     static final String PATH_FOR_FILMS = "/films";
@@ -37,6 +39,15 @@ public class FilmController {
     private static final String PATH_FOR_LIKE = "/like";
     private static final String PATH_FOR_ID_VARIABLE = "/{id}";
     private static final String PATH_FOR_USER_ID_VARIABLE = "/{userId}";
+    
+    
+    // TODO: 2022.09.20 11:25:51 Проверка работы FilmDBStorage - @Dmitriy_Gaju
+    @PostMapping("/filmstest")
+    public ResponseEntity<?> addTest(@RequestBody Film film) {
+        Film addedFilm = filmServiceNew.add(film);
+        return ResponseEntity.ok(addedFilm);
+    }
+    
     
     
     /**

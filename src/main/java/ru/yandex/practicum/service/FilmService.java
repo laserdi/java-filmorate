@@ -2,14 +2,16 @@ package ru.yandex.practicum.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.model.User;
-import ru.yandex.practicum.storage.film.FilmStorage;
-import ru.yandex.practicum.storage.user.UserStorage;
+import ru.yandex.practicum.storage.film.dao.FilmStorage;
+import ru.yandex.practicum.storage.film.impl.FilmDBStorage;
+import ru.yandex.practicum.storage.user.dao.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -27,7 +29,7 @@ public class FilmService {
     Integer x;
     
     @Autowired
-    public FilmService(FilmStorage inMemoryFilmStorage, UserStorage inMemoryUserStorage) {
+    public FilmService(@Qualifier("FilmDBStorage") FilmStorage inMemoryFilmStorage, UserStorage inMemoryUserStorage) {
         this.inMemoryFilmStorage = inMemoryFilmStorage;
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
@@ -62,7 +64,7 @@ public class FilmService {
             //Если ID входящего фильма был присвоен, значит фильма нет в библиотеке
             log.info("Создана новая запись в библиотеке о фильме с названием: '"
                     + film.getName() + "' и ID = " + film.getId() + ".");
-            return inMemoryFilmStorage.createInStorage(film);
+            return inMemoryFilmStorage.addInStorage(film);
             
         } else if (inMemoryFilmStorage.getFilmById(film.getId()) != null) {
             //В библиотеке есть фильм с ID входящего фильма.
@@ -75,7 +77,7 @@ public class FilmService {
             //Поступил фильм со всеми входными параметрами, который был добавлен в библиотеку.
             log.info("Создана новая запись о фильме из 'полного' объекта в теле запроса. " +
                     "В запросе были все необходимые поля.");
-            return inMemoryFilmStorage.createInStorage(film);
+            return inMemoryFilmStorage.addInStorage(film);
         }
         
     }
@@ -95,7 +97,7 @@ public class FilmService {
                 //Если ID входящего фильма был присвоен, значит фильма нет в библиотеке
                 log.info("При обновлении создана новая запись в библиотеке о фильме с названием: '"
                         + film.getName() + "'.");
-                return inMemoryFilmStorage.createInStorage(film);
+                return inMemoryFilmStorage.addInStorage(film);
                 
             } else if (inMemoryFilmStorage.getFilmById(film.getId()) != null) {
                 //В библиотеке есть фильм с ID входящего фильма.

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.storage.user;
+package ru.yandex.practicum.storage.user.dao;
 
 import ru.yandex.practicum.model.User;
 
@@ -25,10 +25,9 @@ public interface UserStorage {
     /**
      * Удалить пользователя из БД. True - удалено.
      *
-     * @param user пользователь
-     * @return True - удалён. False - не выполнено.
+     * @param id ID удаляемого пользователя.
      */
-    User removeFromStorage(User user);
+    void removeFromStorage(Integer id);
     
     /**
      * Получить список всех пользователей.
@@ -54,4 +53,13 @@ public interface UserStorage {
      * <p>null - пользователя нет в библиотеке.</p>
      */
     User getUserByLogin(String login);
+    
+    /**
+     * Проверка наличия юзера в БД.
+     *
+     * @param id пользователя.
+     * @return True - пользователь найден. False - пользователя нет в БД.
+     */
+    public boolean isExistInDB(Integer id);
+    
 }

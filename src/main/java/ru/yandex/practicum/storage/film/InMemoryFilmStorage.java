@@ -2,13 +2,14 @@ package ru.yandex.practicum.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.storage.film.dao.FilmStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Component("InMemoryFilmStorage")       //Используется для однозначности использования классов наследников интерфейса.
 public class InMemoryFilmStorage implements FilmStorage {
     
     private final Map<Integer, Film> films = new HashMap<>();
@@ -32,7 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage {
      * @return добавленный фильм.
      */
     @Override
-    public Film createInStorage(Film film) {
+    public Film addInStorage(Film film) {
         films.put(film.getId(), film);
         return film;
     }
@@ -56,7 +57,7 @@ public class InMemoryFilmStorage implements FilmStorage {
      * @return удалённый фильм.
      */
     @Override
-    public Film removeFromLibrary(Film film) {
+    public Film removeFromStorage(Film film) {
         if (films.remove(film.getId(), film)) {
             return film;
         }

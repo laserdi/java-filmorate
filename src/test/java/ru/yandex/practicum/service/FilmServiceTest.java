@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.model.Film;
-import ru.yandex.practicum.storage.film.FilmStorage;
+import ru.yandex.practicum.storage.film.dao.FilmStorage;
 import ru.yandex.practicum.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.storage.user.UserStorage;
+import ru.yandex.practicum.storage.user.dao.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
