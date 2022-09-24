@@ -1,5 +1,6 @@
 package ru.yandex.practicum.storage.film;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.storage.film.dao.FilmStorage;
@@ -9,7 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component("InMemoryFilmStorage")       //Используется для однозначности использования классов наследников интерфейса.
+@Component
+@Qualifier("InMemoryFilmStorage")       //Используется для однозначности использования классов наследников интерфейса.
 public class InMemoryFilmStorage implements FilmStorage {
     
     private final Map<Integer, Film> films = new HashMap<>();
@@ -85,5 +87,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film getFilmByName(String name) {
         return films.values().stream().filter(f -> f.getName().equals(name)).findFirst().orElse(null);
+    }
+    
+    /**
+     * Найти популярные фильмы.
+     *
+     * @param count число фильмов для результата.
+     *              <p>Если null, то весь список вывести.</p>
+     */
+    @Override
+    public List<Film> getPopularFilms(Integer count) {
+        // TODO: 2022.09.24 04:33:17 Когда-нибудь доделать. - @Dmitriy_Gaju
+        return null;
     }
 }

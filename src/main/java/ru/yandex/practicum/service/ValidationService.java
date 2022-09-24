@@ -1,25 +1,39 @@
 package ru.yandex.practicum.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.exception.ValidateException;
+import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.model.Mpa;
 import ru.yandex.practicum.model.User;
+import ru.yandex.practicum.storage.film.dao.FilmStorage;
 import ru.yandex.practicum.storage.user.dao.UserStorage;
-import ru.yandex.practicum.storage.user.impl.UserDBStorage;
 
 import java.time.LocalDate;
+
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class ValidationService {
     @Qualifier("UserDBStorage")
     private final UserStorage userDBStorage;
     
+    @Qualifier("FilmDBStorage")
+    private final FilmStorage filmDBStorage;
+    
+    public ValidationService(UserStorage userDBStorage, FilmStorage filmDBStorage) {
+        this.userDBStorage = userDBStorage;
+        this.filmDBStorage = filmDBStorage;
+    }
+    
+    // **************************************************
+    // **************************************************
+    // *****                                        *****
+    // *****     Методы работы с пользователями     *****
+    // *****                                        *****
+    // **************************************************
+    // **************************************************
     
     /**
      * Проверка удовлетворения полей объекта User требуемым параметрам:
@@ -71,24 +85,6 @@ public class ValidationService {
         nameSetAsLogin(user);
     }
     
-    
-    
-    /**
-     * Метод проверки наличия пользователя в базе данных по логину.
-     *
-     * @param user пользователь, наличие логина которого необходимо проверить в базе данных.
-     * @return ID, найденный в БД по логину.
-     * Если возвращается не null, то после этой проверки можно обновлять пользователя,
-     * присвоив ему ID из базы данных.
-     * <p>null - пользователя нет в базе данных.</p>
-     */
-    private Integer idFromDBByLogin(User user) {
-        String login = user.getLogin();
-        return userDBStorage.getAllUsersFromStorage().stream().filter(u -> u.getLogin().equals(login))
-                .findFirst().map(User::getId)
-                .orElse(null);
-    }
-    
     /**
      * Метод присвоения имени пользователя при его отсутствии.
      * Если имя пустое, то оно равно логину.
@@ -102,20 +98,101 @@ public class ValidationService {
         }
     }
     
-    
     /**
      * Проверка наличия юзера в БД.
      * @param id пользователя.
      * @throws NotFoundRecordInBD - пользователь найден в БД.
      */
-    public void checkExistInDB(Integer id) {
-        if (userDBStorage.isExistInDB(id)) {
+    public void checkExistUserInDB(Integer id) {
+        if (userDBStorage.isExistUserInDB(id)) {
             return;
         }
-        String error = "404. Пользователь с ID = '" + id + "' не найден в БД.";
+        String error = "Error 404. Пользователь с ID = '" + id + "' не найден в БД.";
         log.error(error);
         throw new NotFoundRecordInBD(error);
     }
     
+    /**
+     * Проверка наличия фильма в БД.
+     * @param id фильма.
+     * @throws NotFoundRecordInBD - фильм найден в БД.
+     */
     
+    public void checkExistFilmInDB(Integer id) {
+        // TODO: 2022.09.23 04:03:31 Реализовать. - @Dmitriy_Gaju
+    }
+    
+    /**
+     * <p>*********Метод пока не нужен.*********</p>
+     * Метод проверки наличия пользователя в базе данных по логину.
+     * @param login пользователь, наличие логина которого необходимо проверить в базе данных.
+     * @return ID, найденный в БД по логину.
+     * Если возвращается не null, то после этой проверки можно обновлять пользователя,
+     * присвоив ему ID из базы данных.
+     * <p>null - пользователя нет в базе данных.</p>
+     */
+    public Integer idFromDBByLogin(String login) {
+        if (login == null) {
+            return null;
+        }
+        for (User u : userDBStorage.getAllUsersFromStorage()) {
+            if (u.getLogin().equals(login)) {
+                return u.getId();
+            }
+        }
+        return null;
+    }
+    
+    // **************************************************
+    // **************************************************
+    // *******                                   ********
+    // *******     Методы работы с фильмами      ********
+    // *******                                   ********
+    // **************************************************
+    // **************************************************
+    
+    /**
+     * Проверка удовлетворения полей объекта Film требуемым параметрам:
+     * <p>* название не может быть пустым;</p>
+     * <p>* максимальная длина описания — 200 символов;</p>
+     * <p>* дата релиза — не раньше 28 декабря 1895 года;</p>
+     * <p>* продолжительность фильма должна быть положительной.</p>
+     *
+     * @param film фильм, который необходимо проверить.
+     * @throws ValidateException в объекте фильма есть ошибки.
+     */
+    public void checkFilm(Film film) throws ValidateException {
+        final Integer ID = film.getId();
+        final String NAME = film.getName();
+        final String DESCRIPTION = film.getDescription();
+        final LocalDate RELEASE_DATE = film.getReleaseDate();
+        final Integer DURATION = film.getDuration();
+        final Mpa MPA = film.getMpa();
+        
+        if (ID == null) {
+            log.info("checkFilm(): ID фильма = null.");
+        }
+        //название не может быть пустым;
+        if (NAME == null || NAME.isEmpty() || NAME.isBlank()) {
+            throw new ValidateException("checkFilm(): Отсутствует название фильма.");
+        }
+        //максимальная длина описания — 200 символов;
+        if (DESCRIPTION != null && DESCRIPTION.length() > 200) {
+            throw new ValidateException("checkFilm(): Максимальная длина описания фильма должна быть не более" +
+                    " 200 символов.");
+        }
+        //дата релиза — не раньше 28 декабря 1895 года;
+        if (RELEASE_DATE != null && RELEASE_DATE.isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ValidateException("checkFilm(): Дата релиза должна быть не раньше 28 декабря 1895 года.");
+        }
+        //продолжительность фильма должна быть положительной.
+        if (DURATION != null && DURATION <= 0) {
+            throw new ValidateException("checkFilm(): Продолжительность фильма должна быть положительной.");
+        }
+        
+        //рейтинг фильма MPA должно быть не mull
+        if (MPA == null) {
+            throw new ValidateException("checkFilm(): Рейтинг фильма MPA должен быть не mull.");
+        }
+    }
 }

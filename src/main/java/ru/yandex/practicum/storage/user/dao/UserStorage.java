@@ -60,6 +60,6 @@ public interface UserStorage {
      * @param id пользователя.
      * @return True - пользователь найден. False - пользователя нет в БД.
      */
-    public boolean isExistInDB(Integer id);
+    boolean isExistUserInDB(Integer id);
     
 }

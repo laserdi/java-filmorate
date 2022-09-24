@@ -21,7 +21,7 @@ class FilmServiceTest {
     Film filmIsCorrectly;
     FilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
     UserStorage inMemoryUserStorage = new InMemoryUserStorage();
-    FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
+    FilmServiceOld filmService = new FilmServiceOld(inMemoryFilmStorage, inMemoryUserStorage);
     List<Film> expectedFilmList;
     
     @BeforeEach

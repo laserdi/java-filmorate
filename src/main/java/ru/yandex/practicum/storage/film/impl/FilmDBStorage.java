@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.model.Film;
@@ -106,6 +105,19 @@ public class FilmDBStorage implements FilmStorage {
         return result;
     }
     
+    
+    /**
+     * Найти популярные фильмы.
+     *
+     * @param count число фильмов для результата.
+     *              <p>Если null, то вывести весь список.</p>
+     */
+    @Override
+    public List<Film> getPopularFilms(Integer count) {
+        return null;
+    }
+    
+    
     /**
      * Метод получения фильма из БД по его ID.
      *
@@ -115,27 +127,19 @@ public class FilmDBStorage implements FilmStorage {
      */
     @Override
     public Film getFilmById(Integer id) {
-        
-        return null;
+        String sqlQuery = "select * from FILMS join MPA ON FILMS.mpa_id = MPA.mpa_id WHERE film_id = ?";
+        return jdbcTemplate.queryForObject(sqlQuery, filmMapper, id);
     }
     
     /**
-     * @param name
-     * @return
+     * Получить фильм из базы данных по его названию.
+     * @param name название фильма.
+     * @return фильм из БД. Если его нет, то 'null'.
      */
     @Override
     public Film getFilmByName(String name) {
         return null;
     }
     
-    /**
-     * Внесение данных о жанре фильма в таблицу film_genre.
-     *
-     * @param film
-     */
-    private void setGenresFilmInDB(Film film) {
-        final String sqlQuery = "UPDATE film_genre set " +
-                "NAME = ?,DESCRIPTION = ?,RELEASE_DATE = ?,DURATION = ?, MPA_ID = ? where FILM_ID = ?";
-        
-    }
+    
 }

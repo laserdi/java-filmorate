@@ -13,8 +13,6 @@ import ru.yandex.practicum.storage.user.dao.UserStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -135,7 +133,7 @@ public class UserDBStorage implements UserStorage {
      * @return True - пользователь найден. False - пользователя нет в БД.
      */
     @Override
-    public boolean isExistInDB(Integer id) {
+    public boolean isExistUserInDB(Integer id) {
         String sqlQuery = "select COUNT(*) from USERS where USER_ID = ?";
         Integer count = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
         if (count != null) {

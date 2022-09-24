@@ -1,24 +1,35 @@
 package ru.yandex.practicum.storage.film.dao;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.model.Genre;
-import ru.yandex.practicum.storage.mapper.GenreMapper;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public interface GenreStorage {
     
     /**
-     * Внесение данных в таблицу жанров и фильмов.
+     * Внесение данных в таблицу фильмов и жанров.
+     * @param filmId ID фильма.
+     * @param genres список жанров.
      */
-    public List<Genre> addInDBFilm_Genre(Integer filmId, Set<Integer> genres);
+    public List<Genre> addInDBFilm_Genre(Integer filmId, List<Genre> genres);
     
     /**
-     * Возвращает список жанров
-     * @return
+     * Получить список жанров фильма с ID = idFilm.
+     * @param idFilm ID фильма.
+     * @return список жанров фильма.
      */
-    public List<Genre> findGenresByFilmIds(Integer id);
+    List<Genre> findGenresOfFilmId(Integer idFilm);
+    
+    /**
+     * Получить все жанры из БД.
+     * @return список жанров.
+     */
+    List<Genre> getAllGenres();
+    
+    /**
+     * Получить жанр из БД по его ID.
+     * @param genreId ID жанра.
+     * @return жанр Genre(genre_id, name).
+     */
+    Genre getGenreById(Integer genreId);
 }

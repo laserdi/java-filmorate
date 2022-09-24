@@ -48,4 +48,11 @@ public interface FilmStorage {
     Film getFilmById(Integer id);
     
     Film getFilmByName(String name);
+    
+    /**
+     * Найти популярные фильмы.
+     * @param count число фильмов для результата.
+     * <p>Если null, то весь список вывести.</p>
+     */
+    List<Film> getPopularFilms(Integer count);
 }

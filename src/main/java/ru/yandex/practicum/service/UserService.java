@@ -1,6 +1,5 @@
 package ru.yandex.practicum.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -8,27 +7,30 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.exception.NotFoundRecordInBD;
 import ru.yandex.practicum.exception.ValidateException;
 import ru.yandex.practicum.model.User;
+import ru.yandex.practicum.storage.friends.dao.FriendsStorage;
 import ru.yandex.practicum.storage.user.dao.UserStorage;
-import ru.yandex.practicum.storage.user.impl.UserDBStorage;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Qualifier("UserDBService")
 public class UserService {
     
     @Qualifier("UserDBStorage")     //Используется для однозначности использования классов наследников интерфейса.
     private final UserStorage userDBStorage;
+    
+    FriendsStorage friendsDBStorage;
+    
     private final ValidationService validationService;
     
     
     @Autowired
-    public UserService(UserStorage userDBStorage, ValidationService validationService) {
+    public UserService(UserStorage userDBStorage, ValidationService validationService,
+                       FriendsStorage friendsDBStorage) {
         this.userDBStorage = userDBStorage;
         this.validationService = validationService;
+        this.friendsDBStorage = friendsDBStorage;
     }
     
     /**
@@ -82,7 +84,7 @@ public class UserService {
         //Проверяем необходимые поля, и, если имя пустое, то оно равно логину.
         validationService.checkUser(user);
         //Проверяем наличие записи о пользователе с ID = user.getId().
-        validationService.checkExistInDB(user.getId());
+        validationService.checkExistUserInDB(user.getId());
         return userDBStorage.updateInStorage(user);
     }
     
@@ -90,14 +92,14 @@ public class UserService {
      * Удалить пользователя из БД.
      *
      * @param id ID удаляемого пользователя
-     * @throws NotFoundRecordInBD из метода validationService.checkExistInDB(id).
+     * @throws NotFoundRecordInBD из метода validationService.checkExistUserInDB(id).
      */
     public void removeFromStorage(Integer id) {
-        validationService.checkExistInDB(id);
+        validationService.checkExistUserInDB(id);
         //Если пользователь есть в БД, то идём далее.
         userDBStorage.removeFromStorage(id);
-        String error = "Выполнено удаление пользователя  из БД с ID = '" + id + ".";
-        log.info(error);
+        String message = "Выполнено удаление пользователя  из БД с ID = '" + id + ".";
+        log.info(message);
     }
     
     
@@ -108,21 +110,11 @@ public class UserService {
      * @param id2 пользователь №2.
      */
     public void addEachOtherAsFriends(Integer id1, Integer id2) {
-        User friend1 = getUserById(id1);
-        User friend2 = getUserById(id2);
-        
-        if (friend1 == null || friend2 == null) {
-            String error = "При добавлении в друзья БД не найден(ы) пользователь(и). " +
-                    "Проверьте передаваемые значения ID.";
-            log.error(error);
-            throw new NotFoundRecordInBD(error);
-        }
-        friend1.getIdsFriends().add(id2);
-        friend2.getIdsFriends().add(id1);
-        
-        addToStorage(friend1);
-        addToStorage(friend2);
-        log.info("Пользователь с ID = " + id1 + " подружился с пользователем с ID = " + id2 + ".");
+        log.debug("Запрос на удаление из друзей.");
+        validationService.checkExistUserInDB(id1);
+        validationService.checkExistUserInDB(id2);
+        // TODO: 2022.09.23 22:25:09 idFriendship считаем равным 2 - не подтверждено. - @Dmitriy_Gaju
+        friendsDBStorage.addFriend(id1, id2, 2);    //idFriendship считаем равным 2 - не подтверждено.
     }
     
     /**
@@ -132,45 +124,12 @@ public class UserService {
      * @param id2 пользователь №2.
      */
     public void deleteFromFriends(Integer id1, Integer id2) {
-        User friend1 = getUserById(id1);
-        User friend2 = getUserById(id2);
-        
-        if (friend1 == null || friend2 == null) {
-            String error = "При удалении из друзей БД не найден(ы) пользователь(и). " +
-                    "Проверьте передаваемые значения ID.";
-            log.error(error);
-            throw new NotFoundRecordInBD(error);
-        }
-        if (!friend1.getIdsFriends().contains(id2) || !friend2.getIdsFriends().contains(id1)) {
-            String error = "При удалении из друзей БД пользователь(и) не является(ются) " +
-                    "другом (друзьями). Проверьте передаваемые значения ID.";
-            log.error(error);
-            throw new NotFoundRecordInBD(error);
-        }
-        friend1.getIdsFriends().remove(id2);
-        friend2.getIdsFriends().remove(id1);
-        
-        addToStorage(friend1);
-        addToStorage(friend2);
-        log.info("Дружба пользователя (ID = " + id1 + ") с пользователем (ID = " + id2 + ") завершена )-;");
+        log.debug("Запрос на удаление из друзей пользователем (Id = {}) пользователя (ID = {}).", id1, id2);
+        validationService.checkExistUserInDB(id1);
+        validationService.checkExistUserInDB(id2);
+        friendsDBStorage.deleteFromFriends(id1, id2);
     }
     
-    
-    /**
-     * Метод проверки наличия пользователя в базе данных по логину.
-     *
-     * @param user пользователь, наличие логина которого необходимо проверить в базе данных.
-     * @return ID, найденный в БД по логину.
-     * Если возвращается не null, то после этой проверки можно обновлять пользователя,
-     * присвоив ему ID из базы данных.
-     * <p>null - пользователя нет в базе данных.</p>
-     */
-    private Integer idFromDBByLogin(User user) {
-        String login = user.getLogin();
-        return userDBStorage.getAllUsersFromStorage().stream().filter(u -> u.getLogin().equals(login))
-                .findFirst().map(User::getId)
-                .orElse(null);
-    }
     
     /**
      * Вывести список общих друзей.
@@ -180,27 +139,12 @@ public class UserService {
      * @return список общих друзей.
      */
     public List<User> getCommonFriends(Integer id1, Integer id2) {
-        User friend1 = getUserById(id1);
-        User friend2 = getUserById(id2);
+        log.debug("Запрос получения общих друзей.");
+        validationService.checkExistUserInDB(id1);
+        validationService.checkExistUserInDB(id2);
         
-        List<User> result = new ArrayList<>();
-        if (friend1 == null || friend2 == null) {
-            String error = "Одного из пользователей (а может, и двух) нет в БД. Проверьте их ID = "
-                    + id1 + " и ID = " + id2 + ".";
-            log.error(error);
-            throw new NotFoundRecordInBD(error);
-        }
-        
-        if (friend1.getIdsFriends() == null || friend1.getIdsFriends().isEmpty()) {
-            log.info("Список друзей пользователя с ID = " + id1 + "пуст.");
-        } else if (friend2.getIdsFriends() == null || friend2.getIdsFriends().isEmpty()) {
-            log.info("Список друзей пользователя с ID = " + id2 + "пуст.");
-        } else {
-            //ищем общих друзей.
-            result = friend1.getIdsFriends().stream()
-                    .filter(id -> friend2.getIdsFriends().contains(id))
-                    .map(this::getUserById).collect(Collectors.toList());
-        }
+        List<User> result = friendsDBStorage.getCommonFriends(id1, id2);
+        log.debug("Запрос получения общих друзей выполнен.");
         return result;
     }
     
@@ -211,23 +155,10 @@ public class UserService {
      * @return список друзей.
      */
     public List<User> getUserFriends(Integer id) {
-        User user = getUserById(id);
-        if (user == null) {
-            String error = "Запрошена выдача списка друзей пользователя с ID = " + id
-                    + ", которого нет в БД.";
-            log.error(error);
-            throw new NotFoundRecordInBD(error);
-        }
-        List<User> result = new ArrayList<>();
-        for (Integer idFriend : user.getIdsFriends()) {
-            User friend = getUserById(idFriend);
-            if (friend == null) {
-                String error = "При выдаче списка друзей пользователя в БД не найден друг с ID = " + idFriend + ".";
-                log.error(error);
-                throw new NotFoundRecordInBD(error);
-            }
-            result.add(getUserById(idFriend));
-        }
+        log.debug("Запрошена выдача списка друзей пользователя с ID = {}.", id);
+        validationService.checkExistUserInDB(id);
+        List<User> result = friendsDBStorage.getFriends(id);
+        log.debug("Выполнен запрос на выдачу списка друзей пользователя с ID = {}.", id);
         return result;
     }
     
@@ -251,37 +182,6 @@ public class UserService {
     }
     
     
-    /**
-     * Метод присвоения имени пользователя при его отсутствии.
-     * Если имя пустое, то оно равно логину.
-     *
-     * @param user обрабатываемый пользователь.
-     */
-    private void nameSetAsLogin(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-    }
     
-    /**
-     * Метод присвоения юзеру уникального ID, если ID не задан.
-     *
-     * @param user обрабатываемый пользователь.
-     * @return True - уникальный ID присвоен.
-     * <p>False - уникальный ID у пользователя user был.</p>
-     */
-    private boolean setUniqueIdForUserFromCount(User user) {
-        if (user.getId() != null) {
-            log.info("Уникальный ID пользователю не нужен. Изначальный ID = " + user.getId());
-            return false;
-        }
-        while (true) {
-            Integer count = User.getCount();
-            if (userDBStorage.getUserById(count) == null) {
-                user.setId(count);
-                log.info("Уникальный ID фильму присвоен. ID = " + user.getId());
-                return true;
-            }
-        }
-    }
+    
 }

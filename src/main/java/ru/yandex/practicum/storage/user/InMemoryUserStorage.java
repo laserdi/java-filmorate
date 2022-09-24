@@ -107,7 +107,7 @@ public class InMemoryUserStorage implements UserStorage {
      * @return True - пользователь найден. False - пользователя нет в БД.
      */
     @Override
-    public boolean isExistInDB(Integer id) {
+    public boolean isExistUserInDB(Integer id) {
         //Когда-нибудь надо будет сделать.
         return false;
     }

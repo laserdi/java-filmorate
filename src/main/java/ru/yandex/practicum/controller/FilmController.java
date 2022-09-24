@@ -3,13 +3,13 @@ package ru.yandex.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.service.FilmService;
-import ru.yandex.practicum.service.FilmServiceNew;
 
 import java.util.List;
 
@@ -24,14 +24,14 @@ import java.util.List;
 @Slf4j
 @Component
 @RestController
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class FilmController {
+    
+    @Qualifier("FilmDBStorage")
     FilmService filmService;
-    FilmServiceNew filmServiceNew;
     @Autowired
-    public FilmController(FilmServiceNew filmServiceNew, FilmService filmService) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.filmServiceNew = filmServiceNew;
     }
     
     static final String PATH_FOR_FILMS = "/films";
@@ -44,7 +44,7 @@ public class FilmController {
     // TODO: 2022.09.20 11:25:51 Проверка работы FilmDBStorage - @Dmitriy_Gaju
     @PostMapping("/filmstest")
     public ResponseEntity<?> addTest(@RequestBody Film film) {
-        Film addedFilm = filmServiceNew.add(film);
+        Film addedFilm = filmService.add(film);
         return ResponseEntity.ok(addedFilm);
     }
     
@@ -104,7 +104,7 @@ public class FilmController {
      */
     @PutMapping("/films/{id}/like/{userId}")
     public ResponseEntity<?> addLikeForFilm(@PathVariable Integer id, @PathVariable Integer userId) {
-        filmService.addLikeForFilm(id, userId);
+        //filmService.addLikeForFilm(id, userId);
         String message = "Лайк фильму (ID = " + id + ") установлен пользователем (ID = " + userId + ").";
         log.info(message);
         return ResponseEntity.ok(message);
