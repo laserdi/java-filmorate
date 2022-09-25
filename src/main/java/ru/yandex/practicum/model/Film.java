@@ -43,7 +43,7 @@ public class Film {
     @JsonIgnore
     Set<Integer> likes = new HashSet<>();
     
-    @JsonIgnore
+    @NotNull
     Set<Genre> genres = new HashSet<>();
     
     /**

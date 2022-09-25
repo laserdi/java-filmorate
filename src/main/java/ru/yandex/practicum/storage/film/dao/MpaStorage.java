@@ -14,11 +14,13 @@ public interface MpaStorage {
     Mpa getMpaById(Integer mpaId);
     
     /**
-     * Получить MPA фильма с ID = idFilm.
-     * @param idFilm ID фильма.
-     * @return список рейтингов фильма.
+     * Получить информацию о наличии MPA с ID = 'mpaId'.
+     *
+     * @param mpaId ID фильма.
+     * @return True — рейтинг с таким ID есть в БД.
+     * <p>False — рейтинга с таким ID нет в БД.</p>
      */
-    boolean existMpaByIdInDB(Integer idFilm);
+    boolean existMpaByIdInDB(Integer mpaId);
     
     /**
      * Получить список всех MPA из БД.

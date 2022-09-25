@@ -2,7 +2,7 @@ package ru.yandex.practicum.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.user.dao.UserStorage;
 
@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
-@Component
+@Repository
 @Qualifier("InMemoryUserStorage")       //Используется для однозначности использования классов наследников интерфейса.
 public class InMemoryUserStorage implements UserStorage {
     private final HashMap<Integer, User> users = new HashMap<>();

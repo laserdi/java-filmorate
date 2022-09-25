@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.mapper.UserMapper;
 import ru.yandex.practicum.storage.user.dao.UserStorage;
@@ -16,13 +16,13 @@ import java.sql.PreparedStatement;
 import java.util.List;
 
 @Slf4j
-@Component
+@Repository
 @Qualifier("UserDBStorage")         //Используется для однозначности использования классов наследников интерфейса.
 public class UserDBStorage implements UserStorage {
     
     
-    private JdbcTemplate jdbcTemplate;
-    private UserMapper userMapper;
+    private final JdbcTemplate jdbcTemplate;
+    private final UserMapper userMapper;
     
     @Autowired
     public UserDBStorage(JdbcTemplate jdbcTemplate, UserMapper userMapper) {

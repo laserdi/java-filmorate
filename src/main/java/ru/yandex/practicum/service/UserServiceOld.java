@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class UserServiceOld {
     @Qualifier("InMemoryUserStorage")
     private final UserStorage inMemoryUStorage;
-    ValidationService validationService;
+    private final ValidationService validationService;
     
     @Autowired
     public UserServiceOld(UserStorage inMemoryUserStorage, ValidationService validationService) {

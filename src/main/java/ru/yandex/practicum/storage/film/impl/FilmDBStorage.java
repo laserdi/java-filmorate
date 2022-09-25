@@ -1,6 +1,6 @@
 package ru.yandex.practicum.storage.film.impl;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,14 +16,14 @@ import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Repository
-@RequiredArgsConstructor
 @Qualifier("FilmDBStorage")
 public class FilmDBStorage implements FilmStorage {
     
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
     
-    private FilmMapper filmMapper;
+    private final FilmMapper filmMapper;
     
     @Autowired
     public FilmDBStorage(JdbcTemplate jdbcTemplate, FilmMapper filmMapper) {
@@ -92,6 +92,17 @@ public class FilmDBStorage implements FilmStorage {
     }
     
     /**
+     * Удалить фильм из библиотеки.
+     *
+     * @param filmId - ID фильма.
+     */
+    @Override
+    public void removeFromStorageById(Integer filmId) {
+        String sqlQuery = "delete from FILMS where FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
+    }
+    
+    /**
      * Вывести список всех фильмов.
      *
      * @return список фильмов.
@@ -110,11 +121,16 @@ public class FilmDBStorage implements FilmStorage {
      * Найти популярные фильмы.
      *
      * @param count число фильмов для результата.
-     *              <p>Если null, то вывести весь список.</p>
+     *              <p>Если null, то вывести 10 фильмов.</p>
      */
     @Override
     public List<Film> getPopularFilms(Integer count) {
-        return null;
+    
+        String sqlQuery = "select F.*, M.* from FILMS as F left join FILM_LIKE as FL on F.FILM_ID = FL.FILM_ID " +
+                "left join MPA as M on F.MPA_ID = M.MPA_ID" +
+                " group by F.FILM_ID order by COUNT(FL.USER_ID) desc limit ?";
+        Integer size = Objects.requireNonNullElse(count, 10); //Если count = null, тогда size = 10
+        return jdbcTemplate.query(sqlQuery, filmMapper, size);
     }
     
     
@@ -138,8 +154,23 @@ public class FilmDBStorage implements FilmStorage {
      */
     @Override
     public Film getFilmByName(String name) {
+        //Пока не реализовал.
         return null;
     }
     
+    /**
+     * Проверка наличия фильма в БД по его ID.
+     * @param id фильма.
+     * @return True - фильм найден. False - фильма нет в БД.
+     */
+    @Override
+    public boolean isExistFilmInDB(Integer id) {
+        String sqlQuery = "select COUNT(*) from FILMS where FILM_ID = ?";
+        Integer count = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
+        if (count != null) {
+            return count.equals(1);
+        }
+        return false;
+    }
     
 }

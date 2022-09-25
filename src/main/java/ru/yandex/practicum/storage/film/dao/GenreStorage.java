@@ -3,6 +3,7 @@ package ru.yandex.practicum.storage.film.dao;
 import ru.yandex.practicum.model.Genre;
 
 import java.util.List;
+import java.util.Set;
 
 public interface GenreStorage {
     
@@ -11,14 +12,14 @@ public interface GenreStorage {
      * @param filmId ID фильма.
      * @param genres список жанров.
      */
-    public List<Genre> addInDBFilm_Genre(Integer filmId, List<Genre> genres);
+    Set<Genre> addInDBFilm_Genre(Integer filmId, Set<Genre> genres);
     
     /**
      * Получить список жанров фильма с ID = idFilm.
      * @param idFilm ID фильма.
      * @return список жанров фильма.
      */
-    List<Genre> findGenresOfFilmId(Integer idFilm);
+    Set<Genre> findGenresOfFilmId(Integer idFilm);
     
     /**
      * Получить все жанры из БД.
@@ -32,4 +33,12 @@ public interface GenreStorage {
      * @return жанр Genre(genre_id, name).
      */
     Genre getGenreById(Integer genreId);
+    
+    /**
+     * Проверить наличие жанра в БД по его ID.
+     * @param genreId ID жанра.
+     * @return True - жанр найден.
+     * <p>False - жанра нет в БД.</p>
+     */
+    boolean existGenreInDBById(Integer genreId);
 }

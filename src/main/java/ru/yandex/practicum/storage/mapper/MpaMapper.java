@@ -2,7 +2,6 @@ package ru.yandex.practicum.storage.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.model.Genre;
 import ru.yandex.practicum.model.Mpa;
 
 import java.sql.ResultSet;

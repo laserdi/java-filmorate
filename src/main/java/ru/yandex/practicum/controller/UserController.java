@@ -28,7 +28,7 @@ import java.util.List;
 //@RequiredArgsConstructor
 public class UserController {
     @Qualifier("UserDBService")
-    UserService userService;
+    private final UserService userService;
     
     @Autowired
     public UserController(UserService userService) {

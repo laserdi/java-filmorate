@@ -17,10 +17,11 @@ public class MpaService {
     // **********************************************
     // Вроде бы доделал. Надо внедрить его в ValidationService и всё остальное.*
     @Qualifier("MpaDBStorage")
-    MpaStorage mpaDBStorage;
-    
-    public MpaService(MpaStorage mpaDBStorage) {
+    private final MpaStorage mpaDBStorage;
+    private final ValidationService validationService;
+    public MpaService(MpaStorage mpaDBStorage, ValidationService validationService) {
         this.mpaDBStorage = mpaDBStorage;
+        this.validationService = validationService;
     }
     
     /**
@@ -30,6 +31,7 @@ public class MpaService {
      * @return MPA или null.
      */
     public Mpa getMpaById(Integer mpaId) {
+        validationService.checkExistMpaInDB(mpaId);
         return mpaDBStorage.getMpaById(mpaId);
     }
     
@@ -42,14 +44,4 @@ public class MpaService {
         return mpaDBStorage.getAllMpa();
     }
     
-    /**
-     * Получить информацию о наличии MPA с ID = 'mpaId'.
-     *
-     * @param mpaId ID фильма.
-     * @return True — рейтинг с таким ID есть в БД.
-     * <p>False — рейтинга с таким ID нет в БД.</p>
-     */
-    public boolean existMpaByIdInDB(Integer mpaId) {
-        return mpaDBStorage.existMpaByIdInDB(mpaId);
-    }
 }

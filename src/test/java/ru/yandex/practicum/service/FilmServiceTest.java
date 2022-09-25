@@ -1,4 +1,4 @@
-package ru.yandex.practicum.service;
+/*package ru.yandex.practicum.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -211,7 +211,7 @@ class FilmServiceTest {
                 .build();
         
     }
-    
+*/
     /**
      * Метод сравнения списков.
      *
@@ -219,6 +219,7 @@ class FilmServiceTest {
      * @param actuallyList актуальный список.
      * @param message      сообщение при ошибке сравнения списков.
      */
+/*
     private void myAssertEqualsList(List<Film> expectedList, List<Film> actuallyList, String message) {
         List<Film> differences = new ArrayList<>(expectedList);
         differences.removeAll(actuallyList);
@@ -227,3 +228,4 @@ class FilmServiceTest {
     }
     
 }
+ */

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.storage.mapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.model.Film;
@@ -10,7 +11,14 @@ import java.time.LocalDate;
 
 @Component
 public class FilmMapper implements RowMapper<Film> {
-    MpaMapper mpaMapper;
+    private final MpaMapper mpaMapper;
+    
+    @Autowired
+    public FilmMapper(MpaMapper mpaMapper) {
+        this.mpaMapper = mpaMapper;
+    }
+    
+    
     /**
      * Метод получения фильма из таблицы `films`
      * @param rs набор строк.
@@ -26,8 +34,7 @@ public class FilmMapper implements RowMapper<Film> {
                 .description(rs.getString("film_desc"))
                 .releaseDate(rs.getObject("release_date", LocalDate.class))
                 .duration(rs.getInt("duration"))
-                // TODO: 2022.09.21 02:42:41 Продумать, что сделать с MPA. - @Dmitriy_Gaju
-                //.mpa(rs.getObject("mpa_id"),Map<mpaMapper)
+                .mpa(mpaMapper.mapRow(rs, rowNum))
                 .build();
         
         return film;

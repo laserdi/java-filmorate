@@ -100,4 +100,26 @@ public class InMemoryFilmStorage implements FilmStorage {
         // TODO: 2022.09.24 04:33:17 Когда-нибудь доделать. - @Dmitriy_Gaju
         return null;
     }
+    
+    /**
+     * Удалить фильм из библиотеки.
+     *
+     * @param filmId - ID фильма.
+     */
+    @Override
+    public void removeFromStorageById(Integer filmId) {
+        // TODO: 2022.09.25 01:52:49 Когда-нибудь сделать. - @Dmitriy_Gaju
+    }
+    
+    /**
+     * Проверка наличия фильма в БД по его ID.
+     *
+     * @param id фильма.
+     * @return True - фильм найден. False - фильма нет в БД.
+     */
+    @Override
+    public boolean isExistFilmInDB(Integer id) {
+        // TODO: 2022.09.25 03:05:05 Когда-нибудь сделать. - @Dmitriy_Gaju
+        return false;
+    }
 }

@@ -10,7 +10,10 @@ import ru.yandex.practicum.storage.friends.dao.FriendsStorage;
 public class FriendsService {
     
     @Qualifier("FriendsDBStorage")
-    FriendsStorage friendsDBStorage;
+    private final FriendsStorage friendsDBStorage;
     
     
+    public FriendsService(FriendsStorage friendsDBStorage) {
+        this.friendsDBStorage = friendsDBStorage;
+    }
 }

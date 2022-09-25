@@ -31,6 +31,13 @@ public interface FilmStorage {
     Film removeFromStorage(Film film);
     
     /**
+     * Удалить фильм из библиотеки.
+     *
+     * @param filmId - ID фильма.
+     */
+    void removeFromStorageById(Integer filmId);
+    
+    /**
      * Вывести список всех фильмов.
      *
      * @return список фильмов.
@@ -51,8 +58,16 @@ public interface FilmStorage {
     
     /**
      * Найти популярные фильмы.
+     *
      * @param count число фильмов для результата.
-     * <p>Если null, то весь список вывести.</p>
+     *              <p>Если null, то весь список вывести.</p>
      */
     List<Film> getPopularFilms(Integer count);
+    
+    /**
+     * Проверка наличия фильма в БД по его ID.
+     * @param id фильма.
+     * @return True - фильм найден. False - фильма нет в БД.
+     */
+    boolean isExistFilmInDB(Integer id);
 }

@@ -1,10 +1,8 @@
 package ru.yandex.practicum.controller;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +26,7 @@ import java.util.List;
 public class FilmController {
     
     @Qualifier("FilmDBStorage")
-    FilmService filmService;
+    private final FilmService filmService;
     @Autowired
     public FilmController(FilmService filmService) {
         this.filmService = filmService;
@@ -39,14 +37,6 @@ public class FilmController {
     private static final String PATH_FOR_LIKE = "/like";
     private static final String PATH_FOR_ID_VARIABLE = "/{id}";
     private static final String PATH_FOR_USER_ID_VARIABLE = "/{userId}";
-    
-    
-    // TODO: 2022.09.20 11:25:51 Проверка работы FilmDBStorage - @Dmitriy_Gaju
-    @PostMapping("/filmstest")
-    public ResponseEntity<?> addTest(@RequestBody Film film) {
-        Film addedFilm = filmService.add(film);
-        return ResponseEntity.ok(addedFilm);
-    }
     
     
     
@@ -69,7 +59,7 @@ public class FilmController {
      */
     @PostMapping("/films")
     public ResponseEntity<?> createFilm(@RequestBody Film film) {
-        return ResponseEntity.ok(filmService.createFilm(film));
+        return ResponseEntity.ok(filmService.add(film));
     }
     
     /**
@@ -80,7 +70,7 @@ public class FilmController {
      */
     @PutMapping("/films")
     public ResponseEntity<?> updateFilm(@RequestBody Film film) {
-        return ResponseEntity.ok(filmService.updateFilm(film));
+        return ResponseEntity.ok(filmService.update(film));
     }
     
     /**
@@ -91,8 +81,9 @@ public class FilmController {
      */
     @GetMapping("/films" + "/{id}")
     public Film getFilmById(@PathVariable Integer id) {
-        log.info("Выдан ответ на запрос фильма по ID.");
-        return filmService.getFilmByID(id);
+        Film film = filmService.getFilmById(id);
+        log.info("Выдан ответ на запрос фильма по ID = {}.\t{}", id, film);
+        return film;
     }
     
     /**
@@ -102,6 +93,7 @@ public class FilmController {
      * @param userId ID пользователя, ставящего лайк.
      * @return сообщение об успешной установке лайка или генерация исключения 'NotFoundRecordInBD'.
      */
+/*
     @PutMapping("/films/{id}/like/{userId}")
     public ResponseEntity<?> addLikeForFilm(@PathVariable Integer id, @PathVariable Integer userId) {
         //filmService.addLikeForFilm(id, userId);
@@ -109,6 +101,7 @@ public class FilmController {
         log.info(message);
         return ResponseEntity.ok(message);
     }
+*/
     
     
     /**
@@ -118,25 +111,14 @@ public class FilmController {
      * @param id     ID пользователя, удаляющего лайк.
      * @param userId ID фильма, которому поставили лайк.
      */
+/*
     @DeleteMapping("/films/{id}/like/{userId}")
     public ResponseEntity<?> deleteLikeForFilm(@PathVariable Integer id, @PathVariable Integer userId) {
-        filmService.deleteLikeForFilm(id, userId);
+        //filmService.deleteLikeForFilm(id, userId);
         String message = "Пользователем (ID = " + userId + ") выполнено удаление лайка фильму (ID = " + id + ").";
         log.info(message);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(message);
     }
-    
-    /**
-     * GET /films/popular?count={count} — возвращает список из первых count фильмов по количеству лайков.
-     * Если значение параметра count не задано, верните первые 10.
-     *
-     * @param count необязательный параметр - размер возвращаемого списка фильмов. (если нет, то 10).
-     * @return список популярных фильмов.
-     */
-    @GetMapping("/films/popular")
-    public List<Film> getPopularFilms(@RequestParam(required = false) Integer count) {
-        List<Film> popularFilms = filmService.getPopularFilm(count);
-        log.info("Выдан ответ на запрос о выдаче списка популярных фильмов.");
-        return popularFilms;
-    }
+*/
+
 }

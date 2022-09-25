@@ -69,6 +69,12 @@ CREATE TABLE IF NOT EXISTS film_genre
     PRIMARY KEY (film_id, genre_id)
 );
 
+CREATE TABLE IF NOT EXISTS film_like
+(
+    film_id int REFERENCES films (film_id) ON DELETE CASCADE,
+    user_id int REFERENCES users (user_id) ON DELETE CASCADE,
+    PRIMARY KEY (film_id, user_id)
+);
 
 /*
 select *

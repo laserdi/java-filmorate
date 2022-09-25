@@ -17,21 +17,22 @@ import java.util.List;
 @Qualifier("UserDBService")
 public class UserService {
     
-    @Qualifier("UserDBStorage")     //Используется для однозначности использования классов наследников интерфейса.
-    private final UserStorage userDBStorage;
+         //Используется для однозначности использования классов наследников интерфейса.
+    private final UserStorage userStorage;
     
-    FriendsStorage friendsDBStorage;
+    private final FriendsStorage friendsDBStorage;
     
     private final ValidationService validationService;
     
     
     @Autowired
-    public UserService(UserStorage userDBStorage, ValidationService validationService,
-                       FriendsStorage friendsDBStorage) {
-        this.userDBStorage = userDBStorage;
+    public UserService(@Qualifier("UserDBStorage") UserStorage userStorage, ValidationService validationService,
+                       @Qualifier("FriendsDBStorage") FriendsStorage friendsStorage) {
+        this.userStorage = userStorage;
         this.validationService = validationService;
-        this.friendsDBStorage = friendsDBStorage;
+        this.friendsDBStorage = friendsStorage;
     }
+    
     
     /**
      * Получить пользователя по ID.
@@ -41,7 +42,7 @@ public class UserService {
      * <p>null - пользователя нет в библиотеке.</p>
      */
     public User getUserById(Integer id) {
-        User result = userDBStorage.getUserById(id);
+        User result = userStorage.getUserById(id);
         if (result == null) {
             String error = "В БД отсутствует запись о пользователе при получении пользователя по ID = " + id + ".";
             log.error(error);
@@ -56,7 +57,7 @@ public class UserService {
      * @return Список пользователей.
      */
     public List<User> getAllUsers() {
-        return userDBStorage.getAllUsersFromStorage();
+        return userStorage.getAllUsersFromStorage();
     }
     
     
@@ -71,7 +72,7 @@ public class UserService {
         // TODO: 2022.09.21 02:20:26 Удалить старый UserServiceOld - @Dmitriy_Gaju
         //Проверяем необходимые поля, и, если имя пустое, то оно равно логину.
         validationService.checkUser(user);
-        return userDBStorage.addToStorage(user);
+        return userStorage.addToStorage(user);
     }
     
     /**
@@ -85,7 +86,7 @@ public class UserService {
         validationService.checkUser(user);
         //Проверяем наличие записи о пользователе с ID = user.getId().
         validationService.checkExistUserInDB(user.getId());
-        return userDBStorage.updateInStorage(user);
+        return userStorage.updateInStorage(user);
     }
     
     /**
@@ -97,7 +98,7 @@ public class UserService {
     public void removeFromStorage(Integer id) {
         validationService.checkExistUserInDB(id);
         //Если пользователь есть в БД, то идём далее.
-        userDBStorage.removeFromStorage(id);
+        userStorage.removeFromStorage(id);
         String message = "Выполнено удаление пользователя  из БД с ID = '" + id + ".";
         log.info(message);
     }
@@ -176,7 +177,7 @@ public class UserService {
      */
     private Integer idFromDBByID(Integer id) {
         
-        return userDBStorage.getAllUsersFromStorage().stream().filter(u -> u.getId().equals(id))
+        return userStorage.getAllUsersFromStorage().stream().filter(u -> u.getId().equals(id))
                 .findFirst().map(User::getId)
                 .orElse(null);
     }

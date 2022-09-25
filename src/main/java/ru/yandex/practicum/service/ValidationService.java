@@ -1,6 +1,7 @@
 package ru.yandex.practicum.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.exception.NotFoundRecordInBD;
@@ -9,6 +10,8 @@ import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.model.Mpa;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.film.dao.FilmStorage;
+import ru.yandex.practicum.storage.film.dao.GenreStorage;
+import ru.yandex.practicum.storage.film.dao.MpaStorage;
 import ru.yandex.practicum.storage.user.dao.UserStorage;
 
 import java.time.LocalDate;
@@ -22,9 +25,19 @@ public class ValidationService {
     @Qualifier("FilmDBStorage")
     private final FilmStorage filmDBStorage;
     
-    public ValidationService(UserStorage userDBStorage, FilmStorage filmDBStorage) {
+    @Qualifier("MpaDBStorage")
+    private final MpaStorage mpaStorage;
+    
+    @Qualifier("GenreDBStorage")
+    private final GenreStorage genreStorage;
+    
+    @Autowired
+    public ValidationService(UserStorage userDBStorage, FilmStorage filmDBStorage, MpaStorage mpaStorage,
+                             GenreStorage genreStorage) {
         this.userDBStorage = userDBStorage;
         this.filmDBStorage = filmDBStorage;
+        this.mpaStorage = mpaStorage;
+        this.genreStorage = genreStorage;
     }
     
     // **************************************************
@@ -42,6 +55,7 @@ public class ValidationService {
      * <p>имя для отображения может быть пустым — в таком случае будет использован логин;</p>
      * <p>дата рождения не может быть в будущем.</p>
      * <p>Если 'name' пользователя отсутствует, то ему присваивается значение 'login'.</p>
+     *
      * @param user пользователь, которого необходимо проверить.
      * @throws ValidateException в объекте пользователя есть ошибки.
      */
@@ -100,6 +114,7 @@ public class ValidationService {
     
     /**
      * Проверка наличия юзера в БД.
+     *
      * @param id пользователя.
      * @throws NotFoundRecordInBD - пользователь найден в БД.
      */
@@ -112,19 +127,11 @@ public class ValidationService {
         throw new NotFoundRecordInBD(error);
     }
     
-    /**
-     * Проверка наличия фильма в БД.
-     * @param id фильма.
-     * @throws NotFoundRecordInBD - фильм найден в БД.
-     */
-    
-    public void checkExistFilmInDB(Integer id) {
-        // TODO: 2022.09.23 04:03:31 Реализовать. - @Dmitriy_Gaju
-    }
     
     /**
      * <p>*********Метод пока не нужен.*********</p>
      * Метод проверки наличия пользователя в базе данных по логину.
+     *
      * @param login пользователь, наличие логина которого необходимо проверить в базе данных.
      * @return ID, найденный в БД по логину.
      * Если возвращается не null, то после этой проверки можно обновлять пользователя,
@@ -193,6 +200,71 @@ public class ValidationService {
         //рейтинг фильма MPA должно быть не mull
         if (MPA == null) {
             throw new ValidateException("checkFilm(): Рейтинг фильма MPA должен быть не mull.");
+        }
+    }
+    
+    
+    /**
+     * Проверка наличия фильма в БД.
+     *
+     * @param filmId ID фильма.
+     * @throws NotFoundRecordInBD - если фильма нет в БД.
+     */
+    public void checkExistFilmInDB(Integer filmId) {
+        if (filmDBStorage.isExistFilmInDB(filmId)) {
+            return;
+        }
+        String error = "Error 404. Фильм с ID = '" + filmId + "' не найден в БД.";
+        log.error(error);
+        throw new NotFoundRecordInBD(error);
+    }
+    
+    // **************************************************
+    // **************************************************
+    // *******                                   ********
+    // *******       Методы работы с MPA         ********
+    // *******                                   ********
+    // **************************************************
+    // **************************************************
+    
+    /**
+     * Получить информацию о наличии MPA с ID = 'mpaId'.
+     *
+     * @param mpaId ID фильма.
+     * @throws NotFoundRecordInBD — рейтинга с таким ID нет в БД.
+     *                            <p>иначе — рейтинг с таким ID есть в БД.</p>
+     */
+    
+    public void checkExistMpaInDB(Integer mpaId) {
+        if (!mpaStorage.existMpaByIdInDB(mpaId)) {
+            String error = "Error 404. MPA-рейтинг с ID = '" + mpaId + "' не найден в БД.";
+            log.info(error);
+            throw new NotFoundRecordInBD(error);
+        }
+    }
+    
+    // **************************************************
+    // **************************************************
+    // *******                                   ********
+    // *******       Методы работы с Genre       ********
+    // *******                                   ********
+    // **************************************************
+    // **************************************************
+    
+    
+    /**
+     * Проверить наличие жанра в БД по его ID.
+     *
+     * @param genreId ID жанра.
+     * @throws NotFoundRecordInBD жанра нет в БД.</p>
+     *                            <p>Иначе - жанр найден.</p>
+     */
+    
+    public void checkExistGenreInDB(Integer genreId) {
+        if (!genreStorage.existGenreInDBById(genreId)) {
+            String error = "Error 404. Жанр с ID = '" + genreId + "' не найден в БД.";
+            log.info(error);
+            throw new NotFoundRecordInBD(error);
         }
     }
 }
