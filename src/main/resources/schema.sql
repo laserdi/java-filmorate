@@ -39,8 +39,8 @@ CREATE TABLE IF NOT EXISTS ids_friends
 CREATE TABLE IF NOT EXISTS mpa
 (
     mpa_id   int AUTO_INCREMENT PRIMARY KEY,
-    mpa_name varchar(10),
-    mpa_desc varchar(100)
+    mpa_name varchar(20),
+    mpa_desc varchar(255)
 );
 
 /*Таблица с описанием возрастного рейтинга фильма.*/
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS films
 CREATE TABLE IF NOT EXISTS genres
 (
     genre_id   int AUTO_INCREMENT PRIMARY KEY,
-    genre_name varchar(20)
+    genre_name varchar(255)
 );
 
 /*Таблица с информацией о том, какому жанру принадлежит фильм.*/

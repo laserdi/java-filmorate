@@ -37,7 +37,7 @@ class FilmDBStorageTest {
                 "(FILM_NAME, FILM_DESC, RELEASE_DATE, DURATION, MPA_ID) " +
                 "VALUES (?, ?, ?, ?, ?)";
 */
-        filmDBStorage.addInStorage(film);
+//        filmDBStorage.addInStorage(film);
         
     }
     
