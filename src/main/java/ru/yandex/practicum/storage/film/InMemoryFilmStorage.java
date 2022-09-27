@@ -1,7 +1,9 @@
 package ru.yandex.practicum.storage.film;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.storage.film.dao.FilmStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@Qualifier("InMemoryFilmStorage")       //Используется для однозначности использования классов наследников интерфейса.
 public class InMemoryFilmStorage implements FilmStorage {
     
     private final Map<Integer, Film> films = new HashMap<>();
@@ -32,7 +35,7 @@ public class InMemoryFilmStorage implements FilmStorage {
      * @return добавленный фильм.
      */
     @Override
-    public Film createInStorage(Film film) {
+    public Film addInStorage(Film film) {
         films.put(film.getId(), film);
         return film;
     }
@@ -56,7 +59,7 @@ public class InMemoryFilmStorage implements FilmStorage {
      * @return удалённый фильм.
      */
     @Override
-    public Film removeFromLibrary(Film film) {
+    public Film removeFromStorage(Film film) {
         if (films.remove(film.getId(), film)) {
             return film;
         }
@@ -84,5 +87,39 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film getFilmByName(String name) {
         return films.values().stream().filter(f -> f.getName().equals(name)).findFirst().orElse(null);
+    }
+    
+    /**
+     * Найти популярные фильмы.
+     *
+     * @param count число фильмов для результата.
+     *              <p>Если null, то весь список вывести.</p>
+     */
+    @Override
+    public List<Film> getPopularFilms(Integer count) {
+        // TODO: 2022.09.24 04:33:17 Когда-нибудь доделать. - @Dmitriy_Gaju
+        return null;
+    }
+    
+    /**
+     * Удалить фильм из библиотеки.
+     *
+     * @param filmId - ID фильма.
+     */
+    @Override
+    public void removeFromStorageById(Integer filmId) {
+        // TODO: 2022.09.25 01:52:49 Когда-нибудь сделать. - @Dmitriy_Gaju
+    }
+    
+    /**
+     * Проверка наличия фильма в БД по его ID.
+     *
+     * @param id фильма.
+     * @return True - фильм найден. False - фильма нет в БД.
+     */
+    @Override
+    public boolean isExistFilmInDB(Integer id) {
+        // TODO: 2022.09.25 03:05:05 Когда-нибудь сделать. - @Dmitriy_Gaju
+        return false;
     }
 }

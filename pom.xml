@@ -17,13 +17,11 @@
     <artifactId>filmorate</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>filmorate</name>
-    <description>Финальный проект 10-го спринта Яндекс-Практикума. Сервис по учёту пользователей и фильмов.</description>
+    <description>Финальный проект 12-го спринта Яндекс-Практикума. Сервис по учёту пользователей и фильмов.
+    </description>
 
     <properties>
         <java.version>11</java.version>
-
-        <!--        <maven.compiler.source>11</maven.compiler.source>-->
-        <!--        <maven.compiler.target>11</maven.compiler.target>-->
     </properties>
 
 
@@ -34,11 +32,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.zalando</groupId>
-            <artifactId>logbook-spring-boot-starter</artifactId>
-            <version>2.14.0</version>
-        </dependency>
+        <!--
+                <dependency>
+                    <groupId>org.zalando</groupId>
+                    <artifactId>logbook-spring-boot-starter</artifactId>
+                    <version>2.14.0</version>
+                </dependency>
+        -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
+<!--            <version>1.18.24</version>-->
             <!-- provided (англ. «предусмотренный», «предоставленный») указывает,
             что данная библиотека необходима только на этапе компиляции проекта. -->
             <scope>provided</scope>
@@ -64,12 +64,58 @@
 
 
         <!--Здесь - это лишнее, поскольку это есть в Spring Boot. -->
+        <!--
+                <dependency>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                    <version>2.8.8</version>
+                </dependency>
+        -->
+
+
+        <!--В этом пакете-стартере содержатся основные зависимости Spring JDBC и класс автоконфигурации
+        для Spring Boot. С помощью них можно настроить доступ к базе данных наиболее простым способом. -->
+        <!--
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-data-jdbc</artifactId>
+                    <version>2.7.1</version>
+                </dependency>
+        -->
+
+
+        <!--Теперь необходимо установить драйвер — тоже с помощью зависимости.-->
+        <!--
+                <dependency>
+                    <groupId>org.postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                    <version>42.3.3</version>
+                </dependency>
+        -->
+
+        <!--Зависимость для работы с БД
+        Эти зависимости (spring-boot-starter-data-jpa, com.h2database) очень плохо
+        подтянулись (то ли из-за интернета, то ли из-за чего-то другого. Ничего не понял.-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.8</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <!--            <version>2.1.214</version>-->
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.2.Final</version>
+<!--            <version>${mapstruct.version}</version>-->
+        </dependency>
     </dependencies>
 
 

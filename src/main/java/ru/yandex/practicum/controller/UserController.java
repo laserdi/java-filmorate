@@ -1,9 +1,9 @@
 package ru.yandex.practicum.controller;
 
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -22,14 +22,13 @@ import java.util.List;
  * обновление пользователя;
  * получение списка всех пользователей.
  */
-
-
 @Slf4j
 @RestController
 @Component
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class UserController {
-    UserService userService;
+    @Qualifier("UserDBService")
+    private final UserService userService;
     
     @Autowired
     public UserController(UserService userService) {
@@ -92,6 +91,20 @@ public class UserController {
     }
     
     /**
+     * Удаление пользователя из БД.
+     *
+     * @param userId удаляемы пользователь.
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable("id") Integer userId) {
+        userService.removeFromStorage(userId);
+        String message = "Выполнено удаление пользователя  из БД с ID = '" + userId + ".";
+        log.info(message);
+        return ResponseEntity.status(HttpStatus.OK).body(message);
+    }
+    
+    
+    /**
      * PUT /users/{id}/friends/{friendId} — добавление в друзья.
      *
      * @param id       ID инициатора дружбы.
@@ -141,6 +154,7 @@ public class UserController {
      * @param otherId ID пользователя №2.
      * @return список общих друзей.
      */
+    //http://localhost:8080/users/1/friends/common/2
     @GetMapping("/users" + "/{id}" + "/friends" + "/common" + "/{otherId}")
     public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         List<User> result = userService.getCommonFriends(id, otherId);

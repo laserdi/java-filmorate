@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.service.UserService;
-import ru.yandex.practicum.storage.user.UserStorage;
+import ru.yandex.practicum.storage.user.dao.UserStorage;
 
 import java.time.LocalDate;
 
