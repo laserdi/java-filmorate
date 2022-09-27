@@ -14,7 +14,7 @@ import java.util.List;
 public class GenreService {
     @Qualifier("GenreDBStorage")
     private final GenreStorage genreStorage;
-    ValidationService validationService;
+    private final ValidationService validationService;
     
     public GenreService(GenreStorage genreStorage, ValidationService validationService) {
         this.genreStorage = genreStorage;
